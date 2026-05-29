@@ -1,0 +1,130 @@
+// backend/src/models/index.js
+import mongoose from "mongoose";
+
+// 1. Model User (Ketua RT / Admin)
+const userSchema = new mongoose.Schema(
+  {
+    username: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, default: "Ketua RT" },
+  },
+  { timestamps: true },
+);
+
+// 2. Model Inventaris
+const inventorySchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    category: { type: String, required: true },
+    totalQuantity: { type: Number, required: true, min: 0 },
+    availabilityStatus: {
+      type: String,
+      enum: ["Tersedia", "Dipinjam"],
+      default: "Tersedia",
+    },
+    conditionStatus: { type: String, enum: ["Baik", "Rusak"], default: "Baik" },
+  },
+  { timestamps: true },
+);
+
+// 3. Model Kas RT (Transaksi iuran/operasional)
+const transactionSchema = new mongoose.Schema(
+  {
+    type: { type: String, enum: ["Masuk", "Keluar"], required: true },
+    amount: { type: Number, required: true },
+    description: { type: String, required: true },
+    date: { type: Date, default: Date.now },
+  },
+  { timestamps: true },
+);
+
+// 4. Model Pengurus RT & Kontak
+const committeeSchema = new mongoose.Schema(
+  {
+    name: { type: String, required: true },
+    position: { type: String, required: true },
+    whatsappNumber: { type: String, required: true }, // Format: 628xxx
+  },
+  { timestamps: true },
+);
+
+// 5. Model Kepala Keluarga (KK)
+// HANYA BAGIAN SKEMA KEPALA KELUARGA (Nomor 5) DI backend/src/models/index.js
+
+// 5. Model Kepala Keluarga (KK) - UPDATED
+const familySchema = new mongoose.Schema(
+  {
+    headOfFamily: { type: String, required: true }, // Nama Lengkap (Mandatory)
+    ktpNumber: { type: String }, // Nomor KTP (Opsional)
+    kkNumber: { type: String }, // Nomor KK (Opsional)
+    whatsappNumber: { type: String, required: true }, // No WA (Mandatory)
+    familyMembersCount: { type: Number, default: 1 }, // Jumlah Anggota (Opsional, default 1 yaitu Kepala Keluarga itu sendiri)
+    houseNumber: { type: String, required: true }, // Nomor Rumah (Mandatory untuk pendataan RT)
+    domicileStatus: {
+      type: String,
+      enum: ["Tetap", "Kontrak"],
+      default: "Tetap",
+    },
+  },
+  { timestamps: true },
+);
+
+// 6. Model Rapat & Notulensi
+const meetingSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    date: { type: Date, required: true },
+    location: { type: String, required: true },
+    status: {
+      type: String,
+      enum: ["Upcoming", "Selesai"],
+      default: "Upcoming",
+    },
+    minutes: { type: String },
+  },
+  { timestamps: true },
+);
+
+// 6. Model Informasi & Dokumentasi
+const informationSchema = new mongoose.Schema(
+  {
+    title: { type: String, required: true },
+    description: { type: String, required: true },
+    category: {
+      type: String,
+      enum: ["Pengumuman", "Kegiatan"],
+      required: true,
+    },
+    imageUrls: [{ type: String }], // Diubah menjadi Array
+    imageFileIds: [{ type: String }], // Diubah menjadi Array
+  },
+  { timestamps: true },
+);
+
+const loanSchema = new mongoose.Schema(
+  {
+    borrowerName: { type: String, required: true },
+    loanDate: { type: Date, required: true },
+    returnDate: { type: Date, required: true },
+    description: { type: String },
+    items: [
+      {
+        itemName: { type: String, required: true },
+        quantity: { type: Number, required: true },
+      },
+    ],
+    status: { type: String, default: "Dipinjam" },
+  },
+  { timestamps: true },
+);
+
+export default mongoose.model("Loan", loanSchema);
+
+export const Loan = mongoose.model("Loan", loanSchema);
+export const Information = mongoose.model("Information", informationSchema);
+export const User = mongoose.model("User", userSchema);
+export const Inventory = mongoose.model("Inventory", inventorySchema);
+export const Transaction = mongoose.model("Transaction", transactionSchema);
+export const Committee = mongoose.model("Committee", committeeSchema);
+export const Family = mongoose.model("Family", familySchema);
+export const Meeting = mongoose.model("Meeting", meetingSchema);

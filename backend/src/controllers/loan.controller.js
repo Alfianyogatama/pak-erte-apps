@@ -1,0 +1,104 @@
+// backend/src/controllers/loan.controller.js
+import { Loan, Inventory } from "../models/index.js";
+
+// GET: Lihat daftar peminjaman
+export const getLoans = async (req, res) => {
+  try {
+    const loans = await Loan.find().sort({ createdAt: -1 });
+    res.status(200).json(loans);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Gagal mengambil data", error: error.message });
+  }
+};
+
+// POST: Buat peminjaman baru
+export const createLoan = async (req, res) => {
+  try {
+    const { borrowerName, loanDate, returnDate, description, items } = req.body;
+
+    // 1. Validasi stok semua item sebelum simpan
+    for (const item of items) {
+      const inv = await Inventory.findOne({ name: item.itemName });
+      if (!inv || inv.totalQuantity < item.quantity) {
+        return res
+          .status(400)
+          .json({ message: `Stok ${item.itemName} tidak cukup!` });
+      }
+    }
+
+    // 2. Kurangi stok dan simpan transaksi
+    for (const item of items) {
+      await Inventory.findOneAndUpdate(
+        { name: item.itemName },
+        { $inc: { totalQuantity: -item.quantity } },
+      );
+    }
+
+    const newLoan = new Loan({
+      borrowerName,
+      loanDate,
+      returnDate,
+      description,
+      items,
+    });
+    await newLoan.save();
+    res.status(201).json(newLoan);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
+// PUT: Update status (Misal: dari Dipinjam ke Kembali)
+export const updateLoanStatus = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updated = await Loan.findByIdAndUpdate(id, req.body, { new: true });
+    res.status(200).json(updated);
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Gagal update status", error: error.message });
+  }
+};
+
+export const returnLoan = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const loan = await Loan.findById(id);
+    if (!loan || loan.status === "Kembali")
+      return res.status(400).json({ message: "Data tidak valid" });
+
+    // 1. Cari barang dan kembalikan stoknya
+    const item = await Inventory.findOne({ name: loan.itemName });
+    if (item) {
+      item.totalQuantity += loan.quantity;
+      await item.save();
+    }
+
+    // 2. Update status pinjam
+    loan.status = "Kembali";
+    await loan.save();
+
+    res.status(200).json({ message: "Barang berhasil dikembalikan" });
+  } catch (error) {
+    res
+      .status(400)
+      .json({ message: "Gagal mengembalikan barang", error: error.message });
+  }
+};
+
+// Tambahkan ini di loan.controller.js
+export const getLoansByItem = async (req, res) => {
+  try {
+    const { itemName } = req.params;
+    // Cari yang statusnya masih 'Dipinjam'
+    const loans = await Loan.find({ itemName, status: "Dipinjam" });
+    res.status(200).json(loans);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Gagal ambil data pinjam", error: error.message });
+  }
+};

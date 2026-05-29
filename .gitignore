@@ -1,0 +1,20 @@
+# Node modules
+node_modules/
+
+# Environment variables (SANGAT PENTING!)
+.env
+.env.local
+.env.development
+.env.test
+.env.production
+
+# Build output
+dist/
+build/
+out/
+
+# System files
+.DS_Store
+*.log
+.vscode/
+.idea/

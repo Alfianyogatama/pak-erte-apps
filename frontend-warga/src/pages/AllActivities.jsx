@@ -7,6 +7,7 @@ import { Navigation, Pagination } from "swiper/modules";
 import "swiper/css";
 import "swiper/css/navigation";
 import "swiper/css/pagination";
+import api from "../utils/api";
 
 const AllActivities = () => {
   const [data, setData] = useState([]);
@@ -14,16 +15,19 @@ const AllActivities = () => {
   const [selectedImage, setSelectedImage] = useState(null);
 
   useEffect(() => {
-    axios
-      .get("http://localhost:5001/api/informations")
-      .then((res) => {
+    const fetchData = async () => {
+      try {
+        const res = await api.get("/informations");
+
         setData(res.data);
-        setLoading(false);
-      })
-      .catch((err) => {
+      } catch (err) {
         console.error("Gagal mengambil data:", err);
+      } finally {
         setLoading(false);
-      });
+      }
+    };
+
+    fetchData();
   }, []);
 
   return (

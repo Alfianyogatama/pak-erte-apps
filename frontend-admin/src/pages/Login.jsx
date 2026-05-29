@@ -2,6 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../utils/api";
 
 const Login = () => {
   const [username, setUsername] = useState("");
@@ -16,13 +17,10 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const response = await axios.post(
-        "http://localhost:5001/api/auth/login",
-        {
-          username,
-          password,
-        },
-      );
+      const response = await api.post("/auth/login", {
+        username,
+        password,
+      });
 
       // Simpan token JWT ke localStorage
       localStorage.setItem("token", response.data.token);

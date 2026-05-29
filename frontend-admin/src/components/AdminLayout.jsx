@@ -1,89 +1,69 @@
-// frontend-admin/src/components/AdminLayout.jsx
-import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Package,
+  Wallet,
+  Users,
+  Megaphone,
+  Printer,
+  LogOut,
+} from "lucide-react";
+import { NavLink } from "react-router-dom";
 
-const AdminLayout = ({ children, title }) => {
-  const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    navigate("/login");
-  };
+const Sidebar = () => {
+  const menuItems = [
+    { name: "Dashboard", path: "/", icon: LayoutDashboard },
+    { name: "Inventaris", path: "/inventory", icon: Package },
+    { name: "Kas", path: "/kas", icon: Wallet },
+    { name: "Data Warga", path: "/warga", icon: Users },
+    { name: "Papan Informasi", path: "/informasi", icon: Megaphone },
+    { name: "Print Peminjaman", path: "/print-surat", icon: Printer },
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-200 flex">
-      {/* Sidebar */}
-      <aside className="w-64 bg-gray-800 text-white flex flex-col">
-        <div className="p-4 bg-gray-900 text-center font-bold text-xl border-b border-gray-700">
+    <div className="w-64 h-screen bg-slate-900 text-white flex flex-col shadow-2xl">
+      {/* Header Sidebar */}
+      <div className="p-6">
+        <h1 className="text-xl font-bold bg-gradient-to-r from-blue-400 to-indigo-400 bg-clip-text text-transparent">
           NgN RT 25 Admin
-        </div>
+        </h1>
+      </div>
 
-        {/* Navigasi Menu - Pastikan hanya ada satu blok ini */}
-        <nav className="flex-1 p-4 space-y-2">
-          <Link
-            to="/"
-            className="block py-2 px-4 hover:bg-gray-700 rounded transition"
+      {/* Menu Navigasi */}
+      <nav className="flex-1 px-4 space-y-2">
+        {menuItems.map((item) => (
+          <NavLink
+            key={item.name}
+            to={item.path}
+            className={({ isActive }) =>
+              `flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 ${
+                isActive
+                  ? "bg-blue-600 text-white shadow-lg shadow-blue-900/50"
+                  : "text-slate-400 hover:bg-slate-800 hover:text-white"
+              }`
+            }
           >
-            Dashboard
-          </Link>
-          <Link
-            to="/inventory"
-            className="block py-2 px-4 hover:bg-gray-700 rounded transition"
-          >
-            Manajemen Inventaris
-          </Link>
-          <Link
-            to="/kas"
-            className="block py-2 px-4 hover:bg-gray-700 rounded transition"
-          >
-            Manajemen Kas
-          </Link>
-          {/* LINK BARU UNTUK DATA WARGA */}
-          <Link
-            to="/warga"
-            className="block py-2 px-4 hover:bg-gray-700 rounded transition"
-          >
-            Data Warga
-          </Link>
-          <Link
-            to="/informasi"
-            className="block py-2 px-4 hover:bg-gray-700 rounded transition"
-          >
-            Papan Informasi
-          </Link>
+            <item.icon size={20} />
+            <span className="font-medium">{item.name}</span>
+          </NavLink>
+        ))}
+      </nav>
 
-          <Link
-            to="/print-surat"
-            className="block py-2 px-4 hover:bg-gray-700 rounded transition"
-          >
-            Print Surat Peminjaman
-          </Link>
-        </nav>
-
-        <div className="p-4 border-t border-gray-700">
-          <button
-            onClick={handleLogout}
-            className="w-full bg-red-600 hover:bg-red-700 py-2 rounded font-semibold transition"
-          >
-            Logout
-          </button>
-        </div>
-      </aside>
-
-      {/* Konten Utama */}
-      <main className="flex-1 p-8">
-        <header className="flex justify-between items-center mb-8 bg-white p-4 rounded shadow">
-          <h1 className="text-2xl font-bold text-gray-800">{title}</h1>
-          <div className="flex items-center gap-2">
-            <span className="font-medium text-gray-700">Ketua RT</span>
-          </div>
-        </header>
-
-        {/* Konten spesifik halaman akan di-render di sini */}
-        {children}
-      </main>
+      {/* Logout Area */}
+      <div className="p-4 border-t border-slate-800">
+        <button className="flex items-center gap-4 px-4 py-3 w-full text-red-400 hover:bg-red-950/30 rounded-xl transition-colors">
+          <LogOut size={20} />
+          <span className="font-medium">Logout</span>
+        </button>
+      </div>
     </div>
   );
 };
 
-export default AdminLayout;
+export default function AdminLayout({ children }) {
+  return (
+    <div className="flex">
+      <Sidebar />
+      <main className="flex-1 p-6 bg-gray-100">{children}</main>
+    </div>
+  );
+}

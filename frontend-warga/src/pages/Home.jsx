@@ -7,6 +7,7 @@ import InfoSection from "../components/InfoSection";
 import CashFlowTable from "../components/CashFlowTable";
 import InventoryList from "../components/InventoryList";
 import WargaModal from "../components/WargaModal";
+import api from "../utils/api";
 
 const Home = () => {
   const [data, setData] = useState({
@@ -27,12 +28,12 @@ const Home = () => {
         // Pastikan endpoint inventories menggunakan /citizens
         const [invRes, sumRes, transRes, wargaSumRes, wargaPubRes, infoRes] =
           await Promise.all([
-            axios.get("http://localhost:5001/api/inventories"),
-            axios.get("http://localhost:5001/api/transactions/summary"),
-            axios.get("http://localhost:5001/api/transactions"),
-            axios.get("http://localhost:5001/api/families/summary"),
-            axios.get("http://localhost:5001/api/families/public"),
-            axios.get("http://localhost:5001/api/informations"),
+            api.get("/inventories"),
+            api.get("/transactions/summary"),
+            api.get("/transactions"),
+            api.get("/families/summary"),
+            api.get("/families/public"),
+            api.get("/informations"),
           ]);
 
         setData({

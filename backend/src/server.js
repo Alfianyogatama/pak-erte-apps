@@ -26,12 +26,12 @@ mongoose
   .then(() => console.log("✅ Terhubung ke database MongoDB"))
   .catch((err) => console.error("❌ Gagal terhubung ke MongoDB:", err.message));
 
-// Route Utama
 app.get("/", (req, res) => {
   res.send("API NgN RT 25 Berjalan Normal");
 });
 
 // API Routes
+
 app.use("/api/auth", authRoutes); // Jalur akses untuk login
 app.use("/api/inventories", inventoryRoutes);
 app.use("/api/transactions", transactionRoutes);

@@ -11,7 +11,7 @@ import { requireAuth } from "../middlewares/authMiddleware.js";
 
 const router = express.Router();
 
-router.get("/", requireAuth, getLoans);
+// router.get("/", requireAuth, getLoans);
 router.get("/item/:itemName", requireAuth, getLoansByItem);
 router.post("/", requireAuth, createLoan);
 router.put("/:id", requireAuth, updateLoanStatus);

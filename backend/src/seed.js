@@ -40,4 +40,3 @@ const seedAdmin = async () => {
 };
 
 seedAdmin();
-ndoe;

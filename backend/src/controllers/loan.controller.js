@@ -16,33 +16,39 @@ export const getLoans = async (req, res) => {
 // POST: Buat peminjaman baru
 export const createLoan = async (req, res) => {
   try {
-    const { borrowerName, loanDate, returnDate, description, items } = req.body;
+    // Sekarang kita terima itemName dan quantity secara langsung
+    const {
+      borrowerName,
+      loanDate,
+      returnDate,
+      description,
+      itemName,
+      quantity,
+    } = req.body;
 
-    // 1. Validasi stok semua item sebelum simpan
-    for (const item of items) {
-      const inv = await Inventory.findOne({ name: item.itemName });
-      if (!inv || inv.totalQuantity < item.quantity) {
-        return res
-          .status(400)
-          .json({ message: `Stok ${item.itemName} tidak cukup!` });
-      }
+    // 1. Cari stok item
+    const inv = await Inventory.findOne({ name: itemName });
+    if (!inv || inv.totalQuantity < quantity) {
+      return res.status(400).json({ message: `Stok ${itemName} tidak cukup!` });
     }
 
-    // 2. Kurangi stok dan simpan transaksi
-    for (const item of items) {
-      await Inventory.findOneAndUpdate(
-        { name: item.itemName },
-        { $inc: { totalQuantity: -item.quantity } },
-      );
-    }
+    // 2. Kurangi stok
+    await Inventory.findOneAndUpdate(
+      { name: itemName },
+      { $inc: { totalQuantity: -quantity } },
+    );
 
+    // 3. Simpan transaksi (items sekarang dibentuk menjadi array berisi 1 objek)
     const newLoan = new Loan({
       borrowerName,
       loanDate,
       returnDate,
       description,
-      items,
+      itemName: itemName,
+      quantity: quantity,
+      status: "Dipinjam",
     });
+
     await newLoan.save();
     res.status(201).json(newLoan);
   } catch (error) {
@@ -95,6 +101,8 @@ export const getLoansByItem = async (req, res) => {
     const { itemName } = req.params;
     // Cari yang statusnya masih 'Dipinjam'
     const loans = await Loan.find({ itemName, status: "Dipinjam" });
+    console.log("Mencari pinjaman untuk barang:", itemName);
+    console.log("Hasil pencarian:", loans);
     res.status(200).json(loans);
   } catch (error) {
     res

@@ -107,12 +107,8 @@ const loanSchema = new mongoose.Schema(
     loanDate: { type: Date, required: true },
     returnDate: { type: Date, required: true },
     description: { type: String },
-    items: [
-      {
-        itemName: { type: String, required: true },
-        quantity: { type: Number, required: true },
-      },
-    ],
+    itemName: { type: String, required: true }, // Nama barang yang dipinjam
+    quantity: { type: Number, required: true, min: 1 }, // Jumlah barang yang dipinjam
     status: { type: String, default: "Dipinjam" },
   },
   { timestamps: true },

@@ -118,6 +118,20 @@ const Inventory = () => {
       Swal.fire("Gagal", "Gagal mengembalikan", "error");
     }
   };
+
+  // Contoh fungsi pembuka modal
+  const handleOpenModal = (item) => {
+    setLoanData({
+      itemName: item.name, // Ambil dari properti item yang di-map
+      availableStock: item.totalQuantity, // Pastikan namanya sesuai field di DB Anda
+      borrowerName: "",
+      quantity: 0,
+      loanDate: "",
+      returnDate: "",
+      description: "",
+    });
+    setShowLoanModal(true);
+  };
   return (
     <AdminLayout title="Manajemen Inventaris">
       <button
@@ -187,77 +201,112 @@ const Inventory = () => {
         </div>
       )}
 
-      {/* Modal Peminjaman */}
       {showLoanModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-lg w-full max-w-md">
-            <h2 className="text-xl font-bold mb-4">
-              Pinjam: {loanData.itemName}
-            </h2>
-            <form onSubmit={handleLoanSubmit} className="space-y-3">
-              <input
-                type="text"
-                placeholder="Nama Peminjam"
-                className="w-full p-2 border rounded"
-                required
-                onChange={(e) =>
-                  setLoanData({ ...loanData, borrowerName: e.target.value })
-                }
-              />
-              <input
-                type="number"
-                placeholder="Jumlah"
-                className="w-full p-2 border rounded"
-                required
-                onChange={(e) =>
-                  setLoanData({
-                    ...loanData,
-                    quantity: parseInt(e.target.value),
-                  })
-                }
-              />
-              <input
-                type="date"
-                className="w-full p-2 border rounded"
-                required
-                onChange={(e) =>
-                  setLoanData({ ...loanData, loanDate: e.target.value })
-                }
-              />
-              <input
-                type="date"
-                className="w-full p-2 border rounded"
-                required
-                onChange={(e) =>
-                  setLoanData({ ...loanData, returnDate: e.target.value })
-                }
-              />
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-6 rounded-2xl shadow-2xl w-full max-w-md animate-in fade-in zoom-in duration-200">
+            <div className="mb-6">
+              <h2 className="text-2xl font-bold text-gray-800">
+                Pinjam Barang
+              </h2>
+              <p className="text-sm text-blue-600 font-medium bg-blue-50 px-3 py-1 rounded-full inline-block mt-2">
+                {loanData.itemName} • Tersedia: {loanData.availableStock} unit
+              </p>
+            </div>
 
-              {/* Tempatkan LoanPrint di sini, tersembunyi tapi ter-update */}
-              <div style={{ display: "none" }}>
-                <LoanPrint ref={componentRef} data={loanData} />
+            <form onSubmit={handleLoanSubmit} className="space-y-4">
+              {/* Nama Peminjam */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                  Nama Peminjam
+                </label>
+                <input
+                  type="text"
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  placeholder="Contoh: Budi Santoso"
+                  required
+                  onChange={(e) =>
+                    setLoanData({ ...loanData, borrowerName: e.target.value })
+                  }
+                />
               </div>
 
-              <div className="flex gap-2 mt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-blue-600 text-white py-2 rounded"
-                >
-                  Simpan
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setTimeout(handlePrint, 300)} // Jeda 300ms agar DOM update
-                  className="flex-1 bg-purple-600 text-white py-2 rounded"
-                >
-                  Cetak
-                </button>
+              {/* Jumlah */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                  Jumlah Unit
+                </label>
+                <input
+                  type="number"
+                  className="w-full p-3 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                  placeholder={`Maksimal ${loanData.availableStock}`}
+                  max={loanData.availableStock}
+                  required
+                  onChange={(e) =>
+                    setLoanData({
+                      ...loanData,
+                      quantity: parseInt(e.target.value),
+                    })
+                  }
+                />
+              </div>
+
+              {/* Tanggal Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                    Tgl Pinjam
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full p-3 border border-gray-200 rounded-xl outline-none"
+                    required
+                    onChange={(e) =>
+                      setLoanData({ ...loanData, loanDate: e.target.value })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                    Tgl Kembali
+                  </label>
+                  <input
+                    type="date"
+                    className="w-full p-3 border border-gray-200 rounded-xl outline-none"
+                    required
+                    onChange={(e) =>
+                      setLoanData({ ...loanData, returnDate: e.target.value })
+                    }
+                  />
+                </div>
+              </div>
+
+              {/* Deskripsi */}
+              <div>
+                <label className="block text-xs font-semibold text-gray-500 uppercase mb-1">
+                  Keperluan / Deskripsi
+                </label>
+                <textarea
+                  className="w-full p-3 border border-gray-200 rounded-xl h-20 resize-none outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Contoh: Acara kerja bakti RT"
+                  onChange={(e) =>
+                    setLoanData({ ...loanData, description: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="flex gap-3 mt-6">
                 <button
                   type="button"
                   onClick={() => setShowLoanModal(false)}
-                  className="px-4 bg-gray-400 text-white py-2 rounded"
+                  className="px-6 py-3 rounded-xl font-semibold text-gray-600 hover:bg-gray-100 transition-colors"
                 >
                   Tutup
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95"
+                >
+                  Simpan Peminjaman
                 </button>
               </div>
             </form>
@@ -326,14 +375,15 @@ const Inventory = () => {
                           Edit
                         </button>
                         <button
-                          onClick={() => {
-                            setLoanData({ ...loanData, itemName: item.name });
-                            setShowLoanModal(true);
-                          }}
+                          onClick={() => handleOpenModal(item)} // Cukup panggil fungsinya di sini
                           disabled={item.totalQuantity <= 0}
-                          className={`px-2 py-1 rounded text-xs transition ${item.totalQuantity <= 0 ? "bg-gray-300 cursor-not-allowed text-gray-500" : "bg-green-500 hover:bg-green-600 text-white"}`}
+                          className={`px-2 py-1 rounded text-xs transition ${
+                            item.totalQuantity <= 0
+                              ? "bg-gray-300 cursor-not-allowed text-gray-500"
+                              : "bg-green-500 hover:bg-green-600 text-white"
+                          }`}
                         >
-                          Pinjam
+                          {item.totalQuantity <= 0 ? "Stok Habis" : "Pinjam"}
                         </button>
                         <button
                           onClick={() => handleDelete(item._id)}

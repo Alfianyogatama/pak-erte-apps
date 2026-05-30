@@ -4,7 +4,14 @@ import AdminLayout from "../components/AdminLayout";
 import api from "../utils/api";
 import Swal from "sweetalert2";
 import { useReactToPrint } from "react-to-print";
-import LoanPrint from "../components/LoanPrint";
+import {
+  Plus,
+  Package,
+  Trash2,
+  Edit2,
+  CornerDownRight,
+  RotateCcw,
+} from "lucide-react";
 
 const Inventory = () => {
   const [inventories, setInventories] = useState([]);
@@ -20,6 +27,7 @@ const Inventory = () => {
     totalQuantity: 1,
     availabilityStatus: "Tersedia",
     conditionStatus: "Baik",
+    description: "",
   });
 
   const [loanData, setLoanData] = useState({
@@ -33,10 +41,6 @@ const Inventory = () => {
 
   const [editId, setEditId] = useState(null);
 
-  const handlePrint = useReactToPrint({
-    contentRef: componentRef,
-    documentTitle: `Bukti_Pinjam_${loanData.borrowerName || "Warga"}`,
-  });
   const fetchInventories = async () => {
     try {
       const response = await api.get("/inventories");
@@ -59,7 +63,11 @@ const Inventory = () => {
       setShowEditModal(false);
       fetchInventories();
     } catch (error) {
-      Swal.fire("Gagal!", "Terjadi kesalahan.", "error");
+      Swal.fire(
+        "Gagal!",
+        error.response?.data?.message || "Terjadi kesalahan.",
+        "error",
+      );
     }
   };
 
@@ -179,6 +187,14 @@ const Inventory = () => {
                 value={formData.totalQuantity}
                 onChange={(e) =>
                   setFormData({ ...formData, totalQuantity: e.target.value })
+                }
+              />
+              <textarea
+                placeholder="Deskripsi Barang (Opsional)"
+                className="w-full p-2 border rounded h-20 resize-none"
+                value={formData.description || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
                 }
               />
               <div className="flex gap-2 mt-4">

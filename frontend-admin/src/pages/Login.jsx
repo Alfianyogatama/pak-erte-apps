@@ -1,83 +1,105 @@
-// frontend-admin/src/pages/Login.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import axios from "axios";
 import api from "../utils/api";
+import Swal from "sweetalert2";
+import { Lock, User } from "lucide-react";
 
 const Login = () => {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+
+  // Ganti URL ini dengan URL dari dashboard ImageKit Anda
+  const LOGO_URL =
+    "https://ik.imagekit.io/bonekie/image%20asset/rt-25-logo.png";
 
   const handleLogin = async (e) => {
     e.preventDefault();
-    setError("");
-    setIsLoading(true);
-
+    setLoading(true);
     try {
-      const response = await api.post("/auth/login", {
-        username,
-        password,
+      const res = await api.post("/auth/login", credentials);
+      localStorage.setItem("token", res.data.token);
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil Masuk!",
+        showConfirmButton: false,
+        timer: 1500,
       });
-
-      // Simpan token JWT ke localStorage
-      localStorage.setItem("token", response.data.token);
-
-      // Arahkan ke Dashboard
       navigate("/");
     } catch (err) {
-      setError(err.response?.data?.message || "Terjadi kesalahan saat login.");
+      Swal.fire({
+        icon: "error",
+        title: "Login Gagal",
+        text: "Username atau password salah",
+      });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <div className="bg-white p-8 rounded shadow-md w-full max-w-sm border-t-4 border-blue-600">
-        <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
-          Login Ketua RT
-        </h1>
-
-        {error && (
-          <div className="bg-red-100 text-red-700 p-3 rounded mb-4 text-sm text-center">
-            {error}
+    <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
+      <div className="bg-white p-8 rounded-3xl shadow-xl w-full max-w-sm border border-slate-100">
+        {/* Logo Section - Load dari URL */}
+        <div className="text-center mb-6">
+          <div className="w-24 h-24 mx-auto mb-4 overflow-hidden rounded-full shadow-md border-2 border-slate-100 bg-slate-50">
+            <img
+              src={LOGO_URL}
+              alt="Logo RT 25"
+              className="w-full h-full object-cover"
+              onError={(e) => (e.target.style.display = "none")} // Sembunyikan jika gagal load
+            />
           </div>
-        )}
+          <h1 className="text-2xl font-bold text-[#1e4a6e]">
+            Halo, Ketua RT! 👋
+          </h1>
+          <p className="text-slate-500 text-sm mt-1">
+            Masuk ke Dashboard Ketua RT 25
+          </p>
+        </div>
 
         <form onSubmit={handleLogin} className="space-y-4">
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Username
-            </label>
+          <div className="relative">
+            <User
+              className="absolute left-3 top-3.5 text-slate-400"
+              size={18}
+            />
             <input
               type="text"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              className="mt-1 w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Username"
+              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#1e4a6e] transition-all"
+              onChange={(e) =>
+                setCredentials({ ...credentials, username: e.target.value })
+              }
               required
             />
           </div>
-          <div>
-            <label className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
+
+          <div className="relative">
+            <Lock
+              className="absolute left-3 top-3.5 text-slate-400"
+              size={18}
+            />
             <input
               type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="mt-1 w-full p-2 border rounded focus:ring-blue-500 focus:border-blue-500"
+              placeholder="Password"
+              className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl outline-none focus:ring-2 focus:ring-[#1e4a6e] transition-all"
+              onChange={(e) =>
+                setCredentials({ ...credentials, password: e.target.value })
+              }
               required
             />
           </div>
+
           <button
             type="submit"
-            disabled={isLoading}
-            className="w-full bg-blue-600 text-white font-semibold py-2 rounded hover:bg-blue-700 transition disabled:opacity-50"
+            disabled={loading}
+            className="w-full bg-[#1e4a6e] hover:bg-[#163853] text-white py-3.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all active:scale-95"
           >
-            {isLoading ? "Memproses..." : "Masuk"}
+            {loading ? "Memproses..." : "Masuk Sekarang"}
           </button>
         </form>
       </div>

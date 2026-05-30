@@ -15,7 +15,29 @@ export const getInventories = async (req, res) => {
 // POST: Tambah data baru (Hanya Ketua RT)
 export const createInventory = async (req, res) => {
   try {
-    const newInventory = new Inventory(req.body);
+    const { name, category, totalQuantity, description } = req.body;
+
+    // 1. Validasi: Cek apakah barang dengan nama yang sama sudah ada
+    const existingItem = await Inventory.findOne({
+      name: { $regex: new RegExp(`^${name}$`, "i") }, // Mencari nama yang sama (case-insensitive)
+    });
+
+    if (existingItem) {
+      return res.status(400).json({
+        message: `Barang dengan nama "${name}" sudah terdaftar!`,
+      });
+    }
+
+    // 2. Jika tidak ada, buat data baru
+    const newInventory = new Inventory({
+      name,
+      category,
+      totalQuantity,
+      description,
+      availabilityStatus: "Tersedia",
+      conditionStatus: "Baik",
+    });
+
     const savedInventory = await newInventory.save();
     res.status(201).json(savedInventory);
   } catch (error) {

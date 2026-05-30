@@ -7,9 +7,22 @@ import {
   Printer,
   LogOut,
 } from "lucide-react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 const Sidebar = () => {
+  const navigate = useNavigate(); // Hook untuk navigasi
+
+  const handleLogout = () => {
+    // 1. Hapus token dari localStorage
+    localStorage.removeItem("token");
+
+    // 2. Opsional: Hapus data sensitif lain jika ada
+    localStorage.clear();
+
+    // 3. Arahkan pengguna ke halaman login
+    navigate("/login");
+  };
+
   const menuItems = [
     { name: "Dashboard", path: "/", icon: LayoutDashboard },
     { name: "Inventaris", path: "/inventory", icon: Package },
@@ -50,7 +63,10 @@ const Sidebar = () => {
 
       {/* Logout Area */}
       <div className="p-4 border-t border-slate-800">
-        <button className="flex items-center gap-4 px-4 py-3 w-full text-red-400 hover:bg-red-950/30 rounded-xl transition-colors">
+        <button
+          onClick={handleLogout}
+          className="flex items-center gap-4 px-4 py-3 w-full text-red-400 hover:bg-red-950/30 rounded-xl transition-colors"
+        >
           <LogOut size={20} />
           <span className="font-medium">Logout</span>
         </button>

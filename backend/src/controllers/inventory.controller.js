@@ -1,5 +1,16 @@
 import { Inventory, Loan } from "../models/index.js";
 
+export const getInventoryById = async (req, res) => {
+  try {
+    const inventory = await Inventory.findById(req.params.id);
+    if (!inventory)
+      return res.status(404).json({ message: "Barang tidak ditemukan" });
+    console.log("Data inventaris ditemukan:", inventory);
+    res.json(inventory);
+  } catch (error) {
+    res.status(500).json({ message: "Error server" });
+  }
+};
 // GET: Ambil semua data (Bisa diakses publik/warga)
 export const getInventories = async (req, res) => {
   try {
@@ -69,9 +80,12 @@ export const deleteInventory = async (req, res) => {
 export const updateInventory = async (req, res) => {
   try {
     const { id } = req.params;
-    const updated = await Inventory.findByIdAndUpdate(id, req.body, {
-      new: true,
-    });
+    console.log(req.body);
+    const updated = await Inventory.findByIdAndUpdate(
+      id,
+      { $set: req.body },
+      { new: true },
+    );
 
     if (!updated) {
       return res.status(404).json({ message: "Barang tidak ditemukan" });

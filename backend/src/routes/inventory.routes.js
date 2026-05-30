@@ -6,6 +6,7 @@ import {
   deleteInventory,
   updateInventory,
   getInventoryForCitizens,
+  getInventoryById,
 } from "../controllers/inventory.controller.js";
 import { requireAuth } from "../middlewares/authMiddleware.js";
 
@@ -13,6 +14,7 @@ const router = express.Router();
 
 // Route Publik (Warga)
 router.get("/", getInventoryForCitizens);
+router.get("/:id", getInventoryById);
 
 // Route Terproteksi (Hanya Ketua RT dengan JWT)
 router.post("/", requireAuth, createInventory);

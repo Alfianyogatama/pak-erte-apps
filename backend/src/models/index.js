@@ -23,7 +23,7 @@ const inventorySchema = new mongoose.Schema(
       default: "Tersedia",
     },
     conditionStatus: { type: String, enum: ["Baik", "Rusak"], default: "Baik" },
-    Description: { type: String },
+    description: { type: String },
   },
   { timestamps: true },
 );

@@ -128,18 +128,45 @@ const Inventory = () => {
   };
 
   // Contoh fungsi pembuka modal
-  const handleOpenModal = (item) => {
-    setLoanData({
-      itemName: item.name, // Ambil dari properti item yang di-map
-      availableStock: item.totalQuantity, // Pastikan namanya sesuai field di DB Anda
-      borrowerName: "",
-      quantity: 0,
-      loanDate: "",
-      returnDate: "",
-      description: "",
-    });
-    setShowLoanModal(true);
+  // const handleOpenModal = (item) => {
+  //   setLoanData({
+  //     itemName: item.name, // Ambil dari properti item yang di-map
+  //     availableStock: item.totalQuantity, // Pastikan namanya sesuai field di DB Anda
+  //     borrowerName: "",
+  //     quantity: 0,
+  //     loanDate: "",
+  //     returnDate: "",
+  //     description: "",
+  //   });
+  //   setShowLoanModal(true);
+  // };
+
+  // Ubah fungsi buka modal edit
+  const handleOpenEditModal = async (id) => {
+    try {
+      // 1. Fetch data terbaru dari server berdasarkan ID
+      const response = await api.get(`/inventories/${id}`);
+
+      // 2. Set formData dengan data dari hasil fetch
+      // Kita pastikan semua field (termasuk description) terisi
+      setFormData({
+        name: response.data.name,
+        category: response.data.category,
+        totalQuantity: response.data.totalQuantity,
+        description: response.data.description || "", // Handle jika description kosong
+        // Tambahkan field lain jika ada (misal status)
+      });
+
+      // 3. Set editId agar form tahu ini mode "Edit"
+      setEditId(id);
+
+      // 4. Buka modalnya
+      setShowEditModal(true);
+    } catch (error) {
+      Swal.fire("Gagal", "Gagal mengambil data barang", "error");
+    }
   };
+
   return (
     <AdminLayout title="Manajemen Inventaris">
       <button
@@ -154,62 +181,83 @@ const Inventory = () => {
 
       {/* MODAL EDIT/TAMBAH */}
       {showEditModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-          <div className="bg-white p-6 rounded-lg w-full max-w-sm">
-            <h2 className="font-bold text-lg mb-4">
+        <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-white p-8 rounded-3xl shadow-2xl w-full max-w-sm border border-slate-100 animate-in fade-in zoom-in duration-200">
+            <h2 className="text-2xl font-bold text-slate-800 mb-6">
               {editId ? "Edit Barang" : "Tambah Barang"}
             </h2>
-            <form onSubmit={handleSubmit} className="space-y-3">
-              <input
-                type="text"
-                placeholder="Nama Barang"
-                className="w-full p-2 border rounded"
-                value={formData.name}
-                onChange={(e) =>
-                  setFormData({ ...formData, name: e.target.value })
-                }
-                required
-              />
-              <input
-                type="text"
-                placeholder="Kategori"
-                className="w-full p-2 border rounded"
-                value={formData.category}
-                onChange={(e) =>
-                  setFormData({ ...formData, category: e.target.value })
-                }
-                required
-              />
-              <input
-                type="number"
-                placeholder="Jumlah"
-                className="w-full p-2 border rounded"
-                value={formData.totalQuantity}
-                onChange={(e) =>
-                  setFormData({ ...formData, totalQuantity: e.target.value })
-                }
-              />
-              <textarea
-                placeholder="Deskripsi Barang (Opsional)"
-                className="w-full p-2 border rounded h-20 resize-none"
-                value={formData.description || ""}
-                onChange={(e) =>
-                  setFormData({ ...formData, description: e.target.value })
-                }
-              />
-              <div className="flex gap-2 mt-4">
-                <button
-                  type="submit"
-                  className="flex-1 bg-green-600 text-white py-2 rounded"
-                >
-                  Simpan
-                </button>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
+                  Nama Barang
+                </label>
+                <input
+                  type="text"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e4a6e] outline-none transition-all"
+                  value={formData.name}
+                  onChange={(e) =>
+                    setFormData({ ...formData, name: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
+                  Kategori
+                </label>
+                <input
+                  type="text"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e4a6e] outline-none transition-all"
+                  value={formData.category}
+                  onChange={(e) =>
+                    setFormData({ ...formData, category: e.target.value })
+                  }
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
+                  Jumlah
+                </label>
+                <input
+                  type="number"
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e4a6e] outline-none transition-all"
+                  value={formData.totalQuantity}
+                  onChange={(e) =>
+                    setFormData({ ...formData, totalQuantity: e.target.value })
+                  }
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
+                  Deskripsi
+                </label>
+                <textarea
+                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl h-20 resize-none focus:ring-2 focus:ring-[#1e4a6e] outline-none"
+                  value={formData.description || ""}
+                  onChange={(e) =>
+                    setFormData({ ...formData, description: e.target.value })
+                  }
+                />
+              </div>
+
+              <div className="flex gap-3 mt-8">
                 <button
                   type="button"
                   onClick={() => setShowEditModal(false)}
-                  className="flex-1 bg-gray-400 text-white py-2 rounded"
+                  className="flex-1 px-4 py-3 bg-slate-100 text-slate-600 rounded-xl font-bold hover:bg-slate-200 transition"
                 >
                   Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-3 bg-[#1e4a6e] text-white rounded-xl font-bold hover:bg-[#163853] shadow-lg shadow-blue-200 transition"
+                >
+                  Simpan Data
                 </button>
               </div>
             </form>
@@ -381,14 +429,10 @@ const Inventory = () => {
                     >
                       <div className="flex justify-center gap-2">
                         <button
-                          onClick={() => {
-                            setFormData(item);
-                            setEditId(item._id);
-                            setShowEditModal(true);
-                          }}
-                          className="bg-yellow-500 hover:bg-yellow-600 text-white px-2 py-1 rounded text-xs"
+                          onClick={() => handleOpenEditModal(item._id)} // Panggil fungsi di atas
+                          className="p-2 text-slate-400 hover:text-amber-500 transition"
                         >
-                          Edit
+                          <Edit2 size={16} />
                         </button>
                         <button
                           onClick={() => handleOpenModal(item)} // Cukup panggil fungsinya di sini

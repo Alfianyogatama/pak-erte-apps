@@ -1,6 +1,5 @@
 // src/pages/Home.jsx
 import React, { useEffect, useState } from "react";
-import axios from "axios";
 import Header from "../components/Header";
 import StatsSection from "../components/StatsSection";
 import InfoSection from "../components/InfoSection";
@@ -22,10 +21,13 @@ const Home = () => {
   const [showWargaDetail, setShowWargaDetail] = useState(false);
   const [loading, setLoading] = useState(true);
 
+  // Ganti dengan URL ImageKit Anda
+  const LOGO_URL =
+    "https://ik.imagekit.io/bonekie/image%20asset/rt-25-logo.png";
+
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Pastikan endpoint inventories menggunakan /citizens
         const [invRes, sumRes, transRes, wargaSumRes, wargaPubRes, infoRes] =
           await Promise.all([
             api.get("/inventories"),
@@ -50,17 +52,30 @@ const Home = () => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, []);
 
   return (
-    <div className="min-h-screen bg-gray-100 p-4 md:p-8">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
-        {/* Header */}
-        <Header />
+        {/* Header dengan Logo */}
+        <div className="flex items-center gap-4 bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+          <img
+            src={LOGO_URL}
+            alt="Logo RT 25"
+            className="w-16 h-16 rounded-full shadow-md"
+          />
+          <div>
+            <h1 className="text-2xl font-bold text-[#1e4a6e]">
+              Portal Warga RT 25
+            </h1>
+            <p className="text-slate-500">
+              Ngunan Unan - Lingkungan Guyub Rukun
+            </p>
+          </div>
+        </div>
 
-        {/* 1. Stats Section (Kas & Warga) - Tetap di atas */}
+        {/* 1. Stats Section (Kas & Warga) */}
         <StatsSection
           summary={data.summary}
           wargaSummary={data.wargaSummary}
@@ -68,21 +83,31 @@ const Home = () => {
           onShowWarga={() => setShowWargaDetail(true)}
         />
 
-        {/* 2. Grid Bawah: Kas & Inventaris - Naik ke tengah */}
+        {/* 2. Grid Bawah: Kas & Inventaris */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          <CashFlowTable transactions={data.transactions} />
-          <InventoryList inventories={data.inventories} loading={loading} />
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <h3 className="font-bold text-lg mb-4 text-[#1e4a6e]">
+              Aktivitas Kas
+            </h3>
+            <CashFlowTable transactions={data.transactions} />
+          </div>
+          <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+            <h3 className="font-bold text-lg mb-4 text-[#1e4a6e]">
+              Inventaris RT
+            </h3>
+            <InventoryList inventories={data.inventories} loading={loading} />
+          </div>
         </div>
 
-        {/* 3. Papan Informasi - Turun ke paling bawah */}
+        {/* 3. Papan Informasi */}
         <InfoSection informations={data.informations} loading={loading} />
       </div>
 
       {/* Modal Warga */}
       {showWargaDetail && (
         <WargaModal
-          onClose={() => setShowWargaDetail(false)}
           publicFamilies={data.publicFamilies}
+          onClose={() => setShowWargaDetail(false)}
         />
       )}
     </div>

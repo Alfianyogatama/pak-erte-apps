@@ -180,6 +180,7 @@ const Inventory = () => {
     });
     setShowLoanModal(true);
   };
+
   return (
     <AdminLayout title="Manajemen Inventaris">
       <button
@@ -392,7 +393,7 @@ const Inventory = () => {
       )}
 
       {/* TABEL */}
-      <div className="bg-white p-6 rounded shadow overflow-x-auto">
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
         <table className="w-full text-left">
           <thead>
             <tr className="bg-gray-100">

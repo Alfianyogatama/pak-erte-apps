@@ -167,6 +167,19 @@ const Inventory = () => {
     }
   };
 
+  // Tambahkan fungsi ini di dalam komponen Inventory
+  const handleOpenModal = (item) => {
+    setLoanData({
+      itemName: item.name,
+      availableStock: item.totalQuantity,
+      borrowerName: "",
+      quantity: 0,
+      loanDate: new Date().toISOString().split("T")[0],
+      returnDate: "",
+      description: "",
+    });
+    setShowLoanModal(true);
+  };
   return (
     <AdminLayout title="Manajemen Inventaris">
       <button

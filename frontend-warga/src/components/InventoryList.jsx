@@ -4,39 +4,32 @@ const InventoryList = ({ inventories, loading }) => {
   if (loading) return <p className="text-gray-500 text-sm italic">Memuat...</p>;
 
   return (
-    <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100">
-      <h2 className="text-xl font-bold mb-6 text-gray-800">Inventaris RT</h2>
-      <div className="grid grid-cols-1 gap-4">
+    <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
+      <div className="flex justify-between items-center mb-6">
+        <h3 className="font-bold text-lg text-[#1e4a6e]">Inventaris RT</h3>
+        <span className="text-xs font-bold text-slate-400 uppercase tracking-wider">
+          {inventories.length} Barang
+        </span>
+      </div>
+
+      {/* Grid yang lebih ringkas, max-height agar tidak terlalu panjang */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
         {inventories.map((item) => (
           <div
             key={item._id}
-            className="p-5 rounded-2xl border border-gray-100 bg-white shadow-sm"
+            className="group flex flex-col justify-between p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-[#1e4a6e]/20 transition-all"
           >
-            <h3 className="font-bold text-gray-900 text-lg mb-4">
+            <p className="font-bold text-slate-800 text-sm mb-3 group-hover:text-[#1e4a6e] transition">
               {item.name}
-            </h3>
+            </p>
 
-            <div className="space-y-2">
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Jumlah Tersedia:</span>
-                <span className="font-bold text-green-600">
-                  {item.available} Unit
-                </span>
-              </div>
-              <div className="flex justify-between text-sm">
-                <span className="text-gray-500">Jumlah Dipinjam:</span>
-                <span className="font-bold text-orange-600">
-                  {item.totalBorrowed} Unit
-                </span>
-              </div>
-              {item.nextReturnDate && (
-                <div className="flex justify-between text-sm pt-2 border-t border-gray-50">
-                  <span className="text-gray-500">Tanggal Kembali:</span>
-                  <span className="font-bold text-gray-800">
-                    {new Date(item.nextReturnDate).toLocaleDateString("id-ID")}
-                  </span>
-                </div>
-              )}
+            <div className="flex justify-between items-center bg-white p-2 rounded-xl border border-slate-100">
+              <span className="text-[10px] text-slate-400 font-bold uppercase">
+                Tersedia
+              </span>
+              <span className="font-bold text-[#7ba85a] text-sm">
+                {item.available || 0}
+              </span>
             </div>
           </div>
         ))}

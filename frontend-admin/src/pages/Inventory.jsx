@@ -393,13 +393,15 @@ const Inventory = () => {
       )}
 
       {/* TABEL */}
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
-        <table className="w-full text-left">
+      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-x-auto">
+        <table className="w-full text-left table-fixed min-w-[600px]">
           <thead>
-            <tr className="bg-gray-100">
-              <th className="p-3">Barang</th>
-              <th className="p-3">Jumlah</th>
-              <th className="p-3 text-center">Aksi</th>
+            <tr>
+              {/* Berikan lebar spesifik agar kolom tidak berebut ruang */}
+              <th className="p-4 w-1/2">Barang</th>
+              <th className="p-4 w-1/4 text-right">Stok</th>
+              <th className="p-4 w-[120px] text-center">Aksi</th>{" "}
+              {/* Kasih lebar tetap */}
             </tr>
           </thead>
           <tbody>
@@ -468,24 +470,24 @@ const Inventory = () => {
                     </td>
 
                     {/* 3. Kolom Aksi */}
-                    <td className="p-4">
+                    <td className="p-4 whitespace-nowrap">
                       <div className="flex justify-end gap-1">
                         <button
                           onClick={() => handleOpenEditModal(item._id)}
-                          className="p-2 text-slate-400 hover:text-amber-500 transition"
+                          className="p-2 text-slate-400 hover:text-amber-500 transition shrink-0"
                         >
                           <Edit2 size={16} />
                         </button>
                         <button
                           onClick={() => handleOpenModal(item)}
                           disabled={item.available <= 0}
-                          className="px-3 py-1.5 bg-[#1e4a6e] text-white rounded-lg text-[10px] font-bold hover:bg-[#163853] transition disabled:opacity-50"
+                          className="px-3 py-1.5 bg-[#1e4a6e] text-white rounded-lg text-[10px] font-bold hover:bg-[#163853] transition disabled:opacity-50 shrink-0"
                         >
                           PINJAM
                         </button>
                         <button
                           onClick={() => handleDelete(item._id)}
-                          className="p-2 text-slate-400 hover:text-red-500 transition"
+                          className="p-2 text-slate-400 hover:text-red-500 transition shrink-0"
                         >
                           <Trash2 size={16} />
                         </button>

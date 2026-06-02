@@ -17,6 +17,7 @@ const inventorySchema = new mongoose.Schema(
     name: { type: String, required: true },
     category: { type: String, required: true },
     totalQuantity: { type: Number, required: true, min: 0 },
+    borrowedQuantity: { type: Number, default: 0 },
     availabilityStatus: {
       type: String,
       enum: ["Tersedia", "Dipinjam"],

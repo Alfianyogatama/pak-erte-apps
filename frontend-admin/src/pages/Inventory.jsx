@@ -414,56 +414,80 @@ const Inventory = () => {
                 <React.Fragment key={item._id}>
                   {/* BARIS UTAMA */}
                   <tr
-                    className={`border-b hover:bg-gray-50 cursor-pointer ${expandedId === item._id ? "bg-blue-50" : ""}`}
-                    onClick={() => toggleExpand(item)}
+                    className={`border-b border-slate-50 hover:bg-slate-50 transition-colors ${expandedId === item._id ? "bg-blue-50/50" : ""}`}
                   >
-                    <td className="p-3">
-                      <p className="font-medium text-gray-800">
-                        {item.name} {expandedId === item._id ? "▼" : "▶"}
-                      </p>
-                      <p className="text-xs text-gray-500">{item.category}</p>
-                    </td>
-
-                    {/* Kolom Jumlah & Status */}
-                    <td className="p-3">
-                      <p className="font-bold text-blue-600">
-                        {item.totalQuantity} unit
-                      </p>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${item.totalQuantity > 0 ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                      >
-                        {item.totalQuantity > 0 ? "TERSEDIA" : "HABIS"}
-                      </span>
-                    </td>
-
-                    {/* Kolom Aksi */}
+                    {/* 1. Kolom Nama & Status Barang */}
                     <td
-                      className="p-3 text-center"
-                      onClick={(e) => e.stopPropagation()}
+                      className="p-4 cursor-pointer"
+                      onClick={() => toggleExpand(item)}
                     >
-                      <div className="flex justify-center gap-2">
+                      <div className="flex items-center gap-3">
+                        <div
+                          className={`w-2 h-2 rounded-full ${item.conditionStatus === "Baik" ? "bg-green-500" : "bg-red-500"}`}
+                        ></div>
+                        <div>
+                          <p className="font-bold text-slate-800">
+                            {item.name}
+                          </p>
+                          <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
+                            {item.conditionStatus}
+                          </p>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* 2. Kolom Stok Visual */}
+                    <td className="p-4">
+                      <div className="flex flex-col items-end">
+                        <div className="flex gap-2 text-xs mb-1">
+                          <span className="text-slate-400">
+                            Tersedia:{" "}
+                            <b className="text-slate-800">{item.available}</b>
+                          </span>
+                          <span className="text-slate-400">|</span>
+                          <span className="text-orange-500 font-bold">
+                            Dipinjam: {item.totalBorrowed}
+                          </span>
+                        </div>
+                        {/* Progress Bar Stok */}
+                        <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden flex">
+                          <div
+                            className="bg-green-500 h-full"
+                            style={{
+                              width: `${(item.available / item.totalQuantity) * 100}%`,
+                            }}
+                          ></div>
+                          <div
+                            className="bg-orange-400 h-full"
+                            style={{
+                              width: `${(item.totalBorrowed / item.totalQuantity) * 100}%`,
+                            }}
+                          ></div>
+                        </div>
+                      </div>
+                    </td>
+
+                    {/* 3. Kolom Aksi */}
+                    <td className="p-4">
+                      <div className="flex justify-end gap-1">
                         <button
-                          onClick={() => handleOpenEditModal(item._id)} // Panggil fungsi di atas
+                          onClick={() => handleOpenEditModal(item._id)}
                           className="p-2 text-slate-400 hover:text-amber-500 transition"
                         >
                           <Edit2 size={16} />
                         </button>
                         <button
-                          onClick={() => handleOpenModal(item)} // Cukup panggil fungsinya di sini
-                          disabled={item.totalQuantity <= 0}
-                          className={`px-2 py-1 rounded text-xs transition ${
-                            item.totalQuantity <= 0
-                              ? "bg-gray-300 cursor-not-allowed text-gray-500"
-                              : "bg-green-500 hover:bg-green-600 text-white"
-                          }`}
+                          onClick={() => handleOpenModal(item)}
+                          disabled={item.available <= 0}
+                          className="px-3 py-1.5 bg-[#1e4a6e] text-white rounded-lg text-[10px] font-bold hover:bg-[#163853] transition disabled:opacity-50"
                         >
-                          {item.totalQuantity <= 0 ? "Stok Habis" : "Pinjam"}
+                          PINJAM
                         </button>
                         <button
                           onClick={() => handleDelete(item._id)}
-                          className="bg-red-500 hover:bg-red-600 text-white px-2 py-1 rounded text-xs"
+                          className="p-2 text-slate-400 hover:text-red-500 transition"
                         >
-                          Hapus
+                          <Trash2 size={16} />
                         </button>
                       </div>
                     </td>

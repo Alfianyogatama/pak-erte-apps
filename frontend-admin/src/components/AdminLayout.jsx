@@ -5,7 +5,9 @@ const AdminLayout = ({ title, children }) => {
   return (
     <div className="flex min-h-screen bg-slate-50">
       {/* Sidebar - Menempel di kiri */}
-      <Sidebar />
+      <div className="w-64 flex-none sticky top-0 h-screen">
+        <Sidebar />
+      </div>
 
       {/* Main Content */}
       <div className="flex-1 flex flex-col">

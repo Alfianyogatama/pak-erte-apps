@@ -1,4 +1,5 @@
 // backend/src/server.js
+process.env.TZ = "Asia/Jakarta";
 import express from "express";
 import mongoose from "mongoose";
 import cors from "cors";
@@ -42,4 +43,8 @@ app.use("/api/loans", loanRoutes);
 // Menjalankan Server
 app.listen(PORT, () => {
   console.log(`🚀 Server berjalan di http://localhost:${PORT}`);
+  console.log(
+    new Date().toLocaleString("id-ID", { timeZone: "Asia/Jakarta" }),
+    "<< Server Started >>",
+  );
 });

@@ -17,4 +17,22 @@ api.interceptors.request.use(
   },
 );
 
+api.interceptors.response.use(
+  (response) => response, // Jika sukses, lanjutkan
+  (error) => {
+    // Jika server merespons 401 (Unauthorized)
+    if (error.response && error.response.status === 401) {
+      // 1. Hapus token dari storage
+      localStorage.removeItem("token");
+
+      // 2. Arahkan user ke halaman login
+      window.location.href = "/login";
+
+      // 3. Opsional: Beri notifikasi
+      alert("Sesi Anda telah berakhir, silakan login kembali.");
+    }
+    return Promise.reject(error);
+  },
+);
+
 export default api;

@@ -7,6 +7,7 @@ import CashFlowTable from "../components/CashFlowTable";
 import InventoryList from "../components/InventoryList";
 import WargaModal from "../components/WargaModal";
 import api from "../utils/api";
+import PrayerTime from "../components/PrayerTime";
 
 const Home = () => {
   const [data, setData] = useState({
@@ -73,6 +74,10 @@ const Home = () => {
               Ngunan Unan - Lingkungan Guyub Rukun
             </p>
           </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto lg:mx-0">
+          <PrayerTime />
         </div>
 
         {/* 1. Stats Section (Kas & Warga) */}

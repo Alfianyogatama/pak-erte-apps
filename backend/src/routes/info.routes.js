@@ -13,7 +13,6 @@ const router = express.Router();
 
 const upload = multer({
   storage: multer.memoryStorage(),
-  // Kita besarkan limitnya karena nanti dikompresi di frontend, tapi sedia payung sebelum hujan
   limits: { fileSize: 10 * 1024 * 1024 },
 });
 

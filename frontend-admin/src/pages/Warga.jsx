@@ -66,7 +66,7 @@ const Warga = () => {
       headOfFamily: item.headOfFamily,
       ktpNumber: item.ktpNumber || "",
       kkNumber: item.kkNumber || "",
-      whatsappNumber: item.whatsappNumber,
+      whatsappNumber: item.whatsappNumber || "",
       familyMembersCount: item.familyMembersCount || 1,
       domicileStatus: item.domicileStatus,
       keterangan: item.keterangan || "",
@@ -178,18 +178,17 @@ const Warga = () => {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700">
-                No. WhatsApp <span className="text-red-500">*</span>
+              <label className="block text-sm font-medium text-gray-700 text-gray-500">
+                No. WhatsApp <span className="text-xs font-normal">(Opsional)</span>
               </label>
               <input
                 type="text"
                 placeholder="Misal: 08123456789"
-                value={formData.whatsappNumber}
+                value={formData.whatsappNumber || ""}
                 onChange={(e) =>
                   setFormData({ ...formData, whatsappNumber: e.target.value })
                 }
                 className="mt-1 w-full p-2 border rounded"
-                required
               />
             </div>
 
@@ -328,14 +327,18 @@ const Warga = () => {
                       )}
                     </td>
                     <td className="p-3">
-                      <a
-                        href={`https://wa.me/${item.whatsappNumber.replace(/^[0]/, "62")}`}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="text-green-600 hover:text-green-800 text-sm font-medium transition"
-                      >
-                        💬 {item.whatsappNumber}
-                      </a>
+                      {item.whatsappNumber ? (
+                        <a
+                          href={`https://wa.me/${item.whatsappNumber.replace(/^[0]/, "62")}`}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="text-green-600 hover:text-green-800 text-sm font-medium transition"
+                        >
+                          💬 {item.whatsappNumber}
+                        </a>
+                      ) : (
+                        <span className="text-gray-400 italic text-xs">Tidak ada WA</span>
+                      )}
                     </td>
                     <td className="p-3 text-xs text-gray-600">
                       <p>

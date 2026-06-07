@@ -61,7 +61,7 @@ const familySchema = new mongoose.Schema(
     kkNumber: { type: String }, // Nomor KK (Opsional)
     whatsappNumber: { type: String, required: true }, // No WA (Mandatory)
     familyMembersCount: { type: Number, default: 1 }, // Jumlah Anggota (Opsional, default 1 yaitu Kepala Keluarga itu sendiri)
-    houseNumber: { type: String, required: true }, // Nomor Rumah (Mandatory untuk pendataan RT)
+    keterangan: { type: String }, // Keterangan / Ancer-ancer Rumah (Opsional)
     domicileStatus: {
       type: String,
       enum: ["Tetap", "Kontrak"],

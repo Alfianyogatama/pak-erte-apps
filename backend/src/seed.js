@@ -11,7 +11,7 @@ const seedAdmin = async () => {
     await mongoose.connect(process.env.MONGODB_URI);
 
     // Cek apakah admin sudah ada
-    const adminExists = await User.findOne({ username: "ketuart" });
+    const adminExists = await User.findOne({ username: "alfian" });
     if (adminExists) {
       console.log("⚠️ Akun Ketua RT sudah ada di database.");
       process.exit();
@@ -19,11 +19,11 @@ const seedAdmin = async () => {
 
     // Hash password "rahasia123"
     const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash("rahasia123", salt);
+    const hashedPassword = await bcrypt.hash("Password@123", salt);
 
     // Buat akun baru
     const admin = new User({
-      username: "ketuart",
+      username: "alfian",
       password: hashedPassword,
       role: "Ketua RT",
     });

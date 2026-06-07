@@ -26,8 +26,8 @@ export const getFamilySummary = async (req, res) => {
 // 2. Dapatkan Detail Semua KK (Hanya Ketua RT)
 export const getFamilies = async (req, res) => {
   try {
-    // Mengurutkan data berdasarkan Nomor Rumah
-    const families = await Family.find().sort({ houseNumber: 1 });
+    // Mengurutkan data berdasarkan Nama Kepala Keluarga secara alfabetis
+    const families = await Family.find().sort({ headOfFamily: 1 });
     res.status(200).json(families);
   } catch (error) {
     res

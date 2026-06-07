@@ -14,8 +14,8 @@ const Warga = () => {
     kkNumber: "",
     whatsappNumber: "",
     familyMembersCount: 1,
-    houseNumber: "",
     domicileStatus: "Tetap",
+    keterangan: "",
   };
 
   const [formData, setFormData] = useState(initialFormState);
@@ -68,8 +68,8 @@ const Warga = () => {
       kkNumber: item.kkNumber || "",
       whatsappNumber: item.whatsappNumber,
       familyMembersCount: item.familyMembersCount || 1,
-      houseNumber: item.houseNumber,
       domicileStatus: item.domicileStatus,
+      keterangan: item.keterangan || "",
     });
     setEditId(item._id);
     window.scrollTo({ top: 0, behavior: "smooth" });
@@ -161,37 +161,20 @@ const Warga = () => {
               />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  No. Rumah <span className="text-red-500">*</span>
-                </label>
-                <input
-                  type="text"
-                  placeholder="Misal: A1-10"
-                  value={formData.houseNumber}
-                  onChange={(e) =>
-                    setFormData({ ...formData, houseNumber: e.target.value })
-                  }
-                  className="mt-1 w-full p-2 border rounded"
-                  required
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium text-gray-700">
-                  Status Domisili <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={formData.domicileStatus}
-                  onChange={(e) =>
-                    setFormData({ ...formData, domicileStatus: e.target.value })
-                  }
-                  className="mt-1 w-full p-2 border rounded bg-white"
-                >
-                  <option value="Tetap">Tetap</option>
-                  <option value="Kontrak">Kontrak/Kost</option>
-                </select>
-              </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Status Domisili <span className="text-red-500">*</span>
+              </label>
+              <select
+                value={formData.domicileStatus}
+                onChange={(e) =>
+                  setFormData({ ...formData, domicileStatus: e.target.value })
+                }
+                className="mt-1 w-full p-2 border rounded bg-white"
+              >
+                <option value="Tetap">Tetap</option>
+                <option value="Kontrak">Kontrak/Kost</option>
+              </select>
             </div>
 
             <div>
@@ -261,6 +244,22 @@ const Warga = () => {
               />
             </div>
 
+            <div>
+              <label className="block text-sm font-medium text-gray-700 text-gray-500">
+                Keterangan (Ancer-ancer Rumah){" "}
+                <span className="text-xs font-normal">(Opsional)</span>
+              </label>
+              <textarea
+                placeholder="Misal: Dekat pos ronda, pagar hijau"
+                value={formData.keterangan || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, keterangan: e.target.value })
+                }
+                className="mt-1 w-full p-2 border rounded bg-gray-50 resize-y"
+                rows="3"
+              />
+            </div>
+
             <div className="flex gap-2 pt-4">
               <button
                 type="submit"
@@ -294,7 +293,7 @@ const Warga = () => {
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr className="bg-gray-100 border-b">
-                <th className="p-3 text-sm">Rumah & Nama</th>
+                <th className="p-3 text-sm">Nama & Domisili</th>
                 <th className="p-3 text-sm">Kontak WA</th>
                 <th className="p-3 text-sm">Dokumen (KTP/KK)</th>
                 <th className="p-3 text-center text-sm">Jml Jiwa</th>
@@ -313,9 +312,6 @@ const Warga = () => {
                   <tr key={item._id} className="border-b hover:bg-gray-50">
                     <td className="p-3">
                       <div className="flex items-center gap-2 mb-1">
-                        <span className="bg-gray-800 text-white text-xs font-bold px-2 py-0.5 rounded">
-                          {item.houseNumber}
-                        </span>
                         <span
                           className={`text-[10px] px-2 py-0.5 rounded border ${item.domicileStatus === "Tetap" ? "bg-blue-50 text-blue-700 border-blue-200" : "bg-orange-50 text-orange-700 border-orange-200"}`}
                         >
@@ -325,6 +321,11 @@ const Warga = () => {
                       <p className="font-bold text-gray-800">
                         {item.headOfFamily}
                       </p>
+                      {item.keterangan && (
+                        <p className="text-xs text-gray-500 italic mt-1">
+                          📍 Ancer-ancer: {item.keterangan}
+                        </p>
+                      )}
                     </td>
                     <td className="p-3">
                       <a

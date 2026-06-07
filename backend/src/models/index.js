@@ -116,6 +116,28 @@ const loanSchema = new mongoose.Schema(
   { timestamps: true },
 );
 
+// 9. Model Anggota Keluarga (Sub-Modul Data Warga per KK)
+const familyMemberSchema = new mongoose.Schema(
+  {
+    familyId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Family",
+      required: true,
+    },
+    noUrut: { type: Number }, // No urut NIK dalam KK
+    nik: { type: String }, // NIK (Opsional)
+    name: { type: String, required: true }, // Nama Lengkap
+    birthPlace: { type: String }, // Tempat Lahir
+    birthDate: { type: Date }, // Tanggal Lahir
+    occupation: { type: String }, // Pekerjaan
+    fatherName: { type: String }, // Nama Ayah Kandung
+    motherName: { type: String }, // Nama Ibu Kandung
+    bpjsNumber: { type: String }, // No BPJS / Jamkes
+    note: { type: String }, // Catatan tambahan
+  },
+  { timestamps: true },
+);
+
 export default mongoose.model("Loan", loanSchema);
 
 export const Loan = mongoose.model("Loan", loanSchema);
@@ -125,4 +147,6 @@ export const Inventory = mongoose.model("Inventory", inventorySchema);
 export const Transaction = mongoose.model("Transaction", transactionSchema);
 export const Committee = mongoose.model("Committee", committeeSchema);
 export const Family = mongoose.model("Family", familySchema);
+export const FamilyMember = mongoose.model("FamilyMember", familyMemberSchema);
 export const Meeting = mongoose.model("Meeting", meetingSchema);
+

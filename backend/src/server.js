@@ -8,6 +8,7 @@ import authRoutes from "./routes/auth.routes.js";
 import inventoryRoutes from "./routes/inventory.routes.js";
 import transactionRoutes from "./routes/transaction.routes.js";
 import familyRoutes from "./routes/family.routes.js";
+import familyMemberRoutes from "./routes/familyMember.routes.js";
 import infoRoutes from "./routes/info.routes.js";
 import loanRoutes from "./routes/loan.routes.js";
 
@@ -37,6 +38,7 @@ app.use("/api/auth", authRoutes); // Jalur akses untuk login
 app.use("/api/inventories", inventoryRoutes);
 app.use("/api/transactions", transactionRoutes);
 app.use("/api/families", familyRoutes);
+app.use("/api/family-members", familyMemberRoutes);
 app.use("/api/informations", infoRoutes);
 app.use("/api/loans", loanRoutes);
 

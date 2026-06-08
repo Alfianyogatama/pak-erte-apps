@@ -1,19 +1,16 @@
 // backend/src/controllers/family.controller.js
-import { Family } from "../models/index.js";
+import { Family, FamilyMember } from "../models/index.js";
 
 // 1. Dapatkan Statistik Warga (Bisa diakses publik/Landing Page)
 // backend/src/controllers/family.controller.js -> Cek fungsi nomor 1
 
 export const getFamilySummary = async (req, res) => {
   try {
+    // Menghitung jumlah Kepala Keluarga (Setiap 1 dokumen Family = 1 Kepala Keluarga)
     const totalKK = await Family.countDocuments();
 
-    const families = await Family.find();
-    // Gunakan (fam.familyMembersCount || 1) sebagai fallback jika data kosong/0
-    const totalWarga = families.reduce(
-      (sum, fam) => sum + (fam.familyMembersCount || 1),
-      0,
-    );
+    // Total Jiwa sekarang diambil dari total data anggota (karena KK sudah termasuk di dalamnya)
+    const totalWarga = await FamilyMember.countDocuments();
 
     res.status(200).json({ totalKK, totalWarga });
   } catch (error) {

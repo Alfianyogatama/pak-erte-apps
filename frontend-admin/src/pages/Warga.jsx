@@ -3,6 +3,10 @@ import React, { useState, useEffect } from "react";
 import AdminLayout from "../components/AdminLayout";
 import api from "../utils/api";
 import Swal from "sweetalert2"; // Import SweetAlert2
+import MemberForm from "../components/MemberForm"; // Pastikan path ini benar sesuai struktur proyek Anda
+import MemberDetailModal from "../components/MemberDetailModal";
+import { Eye, Plus, UserPlus, Pencil, Trash2 } from "lucide-react"; // Import icon untuk UI lebih bagus
+import { NavLink } from "react-router-dom";
 
 const Warga = () => {
   const [families, setFamilies] = useState([]);
@@ -13,7 +17,7 @@ const Warga = () => {
     ktpNumber: "",
     kkNumber: "",
     whatsappNumber: "",
-    familyMembersCount: 1,
+    familyMembersCount: 0,
     domicileStatus: "Tetap",
     keterangan: "",
   };
@@ -67,7 +71,7 @@ const Warga = () => {
       ktpNumber: item.ktpNumber || "",
       kkNumber: item.kkNumber || "",
       whatsappNumber: item.whatsappNumber || "",
-      familyMembersCount: item.familyMembersCount || 1,
+      familyMembersCount: item.familyMembersCount || 0,
       domicileStatus: item.domicileStatus,
       keterangan: item.keterangan || "",
     });
@@ -103,6 +107,11 @@ const Warga = () => {
       }
     }
   };
+
+  const [selectedMember, setSelectedMember] = useState(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [selectedFamilyId, setSelectedFamilyId] = useState(null); // <--- Untuk menyimpan ID keluarga yang dipilih
 
   return (
     <AdminLayout title="Manajemen Data Warga (KK)">
@@ -179,7 +188,8 @@ const Warga = () => {
 
             <div>
               <label className="block text-sm font-medium text-gray-700 text-gray-500">
-                No. WhatsApp <span className="text-xs font-normal">(Opsional)</span>
+                No. WhatsApp{" "}
+                <span className="text-xs font-normal">(Opsional)</span>
               </label>
               <input
                 type="text"
@@ -337,7 +347,9 @@ const Warga = () => {
                           💬 {item.whatsappNumber}
                         </a>
                       ) : (
-                        <span className="text-gray-400 italic text-xs">Tidak ada WA</span>
+                        <span className="text-gray-400 italic text-xs">
+                          Tidak ada WA
+                        </span>
                       )}
                     </td>
                     <td className="p-3 text-xs text-gray-600">
@@ -355,23 +367,47 @@ const Warga = () => {
                       </p>
                     </td>
                     <td className="p-3 text-center font-bold text-blue-600 text-lg">
-                      {item.familyMembersCount || 1}
+                      {item.familyMembersCount || 0}
                     </td>
                     <td className="p-3 text-center">
-                      <div className="flex justify-center gap-2">
+                      <div className="flex flex-col gap-2">
                         <button
-                          onClick={() => handleEditClick(item)}
-                          className="text-yellow-600 hover:text-yellow-800 text-sm font-medium transition"
+                          onClick={() => {
+                            setSelectedFamilyId(item._id);
+                            setIsDetailModalOpen(true);
+                          }}
+                          className="text-xs flex items-center justify-center gap-1 bg-blue-50 text-blue-700 hover:bg-blue-100 py-1.5 px-2 rounded border border-blue-200 transition"
                         >
-                          Edit
+                          <Eye size={12} /> Detail Anggota
                         </button>
-                        <span className="text-gray-300">|</span>
+
                         <button
-                          onClick={() => handleDelete(item._id)}
-                          className="text-red-600 hover:text-red-800 text-sm font-medium transition"
+                          onClick={() => {
+                            setSelectedFamilyId(item._id);
+                            setSelectedMember(null);
+                            setIsModalOpen(true);
+                          }}
+                          className="text-xs flex items-center justify-center gap-1 bg-green-50 text-green-700 hover:bg-green-100 py-1.5 px-2 rounded border border-green-200 transition"
                         >
-                          Hapus
+                          <UserPlus size={12} /> Tambah Anggota
                         </button>
+
+                        {/* Tombol Edit & Hapus yang sudah ada */}
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => handleEditClick(item)}
+                            className="text-yellow-600 hover:text-yellow-800 transition"
+                          >
+                            <Pencil size={16} />
+                          </button>
+                          <span className="text-gray-300">|</span>
+                          <button
+                            onClick={() => handleDelete(item._id)}
+                            className="text-red-600 hover:text-red-800 transition"
+                          >
+                            <Trash2 size={16} />
+                          </button>
+                        </div>
                       </div>
                     </td>
                   </tr>
@@ -381,6 +417,26 @@ const Warga = () => {
           </table>
         </div>
       </div>
+      <MemberDetailModal
+        familyId={selectedFamilyId}
+        isOpen={isDetailModalOpen}
+        onClose={() => setIsDetailModalOpen(false)}
+        onEdit={(member) => {
+          setSelectedMember(member);
+          setIsDetailModalOpen(false); // Close detail modal
+          setIsModalOpen(true); // Open edit form
+        }}
+      />
+      <MemberForm
+        familyId={selectedFamilyId}
+        member={selectedMember}
+        isOpen={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        onSave={() => {
+          fetchData(); // Refresh data warga setelah tambah/edit anggota
+          setIsModalOpen(false);
+        }}
+      />
     </AdminLayout>
   );
 };

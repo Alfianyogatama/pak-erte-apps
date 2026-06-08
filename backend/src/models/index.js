@@ -60,7 +60,7 @@ const familySchema = new mongoose.Schema(
     ktpNumber: { type: String }, // Nomor KTP (Opsional)
     kkNumber: { type: String }, // Nomor KK (Opsional)
     whatsappNumber: { type: String }, // No WA (Opsional)
-    familyMembersCount: { type: Number, default: 1 }, // Jumlah Anggota (Opsional, default 1 yaitu Kepala Keluarga itu sendiri)
+    familyMembersCount: { type: Number, default: 0 }, // Dihitung otomatis dari FamilyMember
     keterangan: { type: String }, // Keterangan / Ancer-ancer Rumah (Opsional)
     domicileStatus: {
       type: String,
@@ -124,7 +124,21 @@ const familyMemberSchema = new mongoose.Schema(
       ref: "Family",
       required: true,
     },
-    noUrut: { type: Number }, // No urut NIK dalam KK
+    noUrut: { type: Number }, // Menambahkan field noUrut untuk sinkronisasi dengan controller
+    status: {
+      type: String,
+      enum: [
+        "Kepala Keluarga",
+        "Suami",
+        "Istri",
+        "Anak",
+        "Menantu",
+        "Cucu",
+        "Orangtua",
+        "Mertua",
+        "Famili Lain",
+      ],
+    }, // No urut NIK dalam KK
     nik: { type: String }, // NIK (Opsional)
     name: { type: String, required: true }, // Nama Lengkap
     birthPlace: { type: String }, // Tempat Lahir
@@ -149,4 +163,3 @@ export const Committee = mongoose.model("Committee", committeeSchema);
 export const Family = mongoose.model("Family", familySchema);
 export const FamilyMember = mongoose.model("FamilyMember", familyMemberSchema);
 export const Meeting = mongoose.model("Meeting", meetingSchema);
-

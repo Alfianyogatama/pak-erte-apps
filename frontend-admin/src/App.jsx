@@ -8,6 +8,7 @@ import Kas from "./pages/Kas.jsx"; // 1. Pastikan sudah di-import
 import Warga from "./pages/Warga.jsx";
 import Informasi from "./pages/Informasi.jsx";
 import PrintSurat from "./pages/PrintSurat";
+import FamilyDetail from "./pages/FamilyDetail";
 
 const ProtectedRoute = ({ children }) => {
   const token = localStorage.getItem("token");
@@ -40,7 +41,6 @@ function App() {
           }
         />
 
-        {/* 3. Route Kas dimasukkan ke sini, SEBELUM penutup </Routes> */}
         <Route
           path="/kas"
           element={
@@ -64,6 +64,21 @@ function App() {
               <Informasi />
             </ProtectedRoute>
           }
+        />
+        {/* Rute Detail Anggota */}
+        <Route
+          path="/family-detail/:familyId"
+          element={
+            <ProtectedRoute>
+              <FamilyDetail />
+            </ProtectedRoute>
+          }
+        />
+
+        {/* Opsional: Tambahkan ini agar tidak error jika buka /family-detail saja */}
+        <Route
+          path="/family-detail"
+          element={<Navigate to="/warga" replace />}
         />
       </Routes>
       <Routes>

@@ -8,7 +8,9 @@ export const getMembersByFamily = async (req, res) => {
     const members = await FamilyMember.find({ familyId }).sort({ noUrut: 1 });
     res.status(200).json(members);
   } catch (error) {
-    res.status(500).json({ message: "Gagal mengambil data anggota", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Gagal mengambil data anggota", error: error.message });
   }
 };
 
@@ -28,6 +30,7 @@ export const createMember = async (req, res) => {
 
     // Sinkronkan familyMembersCount: hitung ulang dari database
     const count = await FamilyMember.countDocuments({ familyId });
+    // Sekarang jumlah jiwa sinkron dengan total di koleksi FamilyMember
     await Family.findByIdAndUpdate(familyId, { familyMembersCount: count });
 
     res.status(201).json(savedMember);
@@ -40,13 +43,17 @@ export const createMember = async (req, res) => {
 export const updateMember = async (req, res) => {
   try {
     const { memberId } = req.params;
-    const updated = await FamilyMember.findByIdAndUpdate(memberId, req.body, { new: true });
+    const updated = await FamilyMember.findByIdAndUpdate(memberId, req.body, {
+      new: true,
+    });
     if (!updated) {
       return res.status(404).json({ message: "Anggota tidak ditemukan" });
     }
     res.status(200).json(updated);
   } catch (error) {
-    res.status(400).json({ message: "Gagal mengupdate data", error: error.message });
+    res
+      .status(400)
+      .json({ message: "Gagal mengupdate data", error: error.message });
   }
 };
 
@@ -63,11 +70,13 @@ export const deleteMember = async (req, res) => {
     const familyId = deleted.familyId;
     const count = await FamilyMember.countDocuments({ familyId });
     await Family.findByIdAndUpdate(familyId, {
-      familyMembersCount: count > 0 ? count : 1, // minimal 1 (Kepala Keluarga sendiri)
+      familyMembersCount: count,
     });
 
     res.status(200).json({ message: "Anggota berhasil dihapus" });
   } catch (error) {
-    res.status(500).json({ message: "Gagal menghapus data", error: error.message });
+    res
+      .status(500)
+      .json({ message: "Gagal menghapus data", error: error.message });
   }
 };

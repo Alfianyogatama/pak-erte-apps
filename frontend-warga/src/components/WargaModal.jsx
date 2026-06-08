@@ -19,32 +19,41 @@ const WargaModal = ({ onClose, publicFamilies }) => (
       {/* List Warga */}
       <div className="p-2 overflow-y-auto max-h-[60vh]">
         {publicFamilies?.length > 0 ? (
-          publicFamilies.map((warga, index) => (
-            <div
-              key={warga._id || index}
-              className="px-6 py-4 flex justify-between items-center hover:bg-slate-50 transition border-b last:border-0 border-slate-100"
-            >
-              <div>
-                <p className="font-bold text-slate-800 text-sm">
-                  {warga.headOfFamily}
-                </p>
-                <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
-                  KEPALA KELUARGA
-                </p>
-              </div>
+          publicFamilies.map((warga, index) => {
+            // Bersihkan nomor dari karakter non-angka (seperti -, spasi, dll)
+            const cleanNumber = warga.whatsappNumber
+              ? warga.whatsappNumber.replace(/\D/g, "")
+              : "";
+            // Validasi sederhana: nomor dianggap ada jika setelah dibersihkan minimal punya 9 digit
+            const hasValidWA = cleanNumber.length >= 9;
 
-              {warga.whatsappNumber && (
-                <a
-                  href={`https://wa.me/${warga.whatsappNumber.replace(/^[0]/, "62")}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 bg-[#7ba85a]/10 hover:bg-[#7ba85a]/20 text-[#7ba85a] px-3 py-1.5 rounded-lg text-[10px] font-bold transition"
-                >
-                  <MessageCircle size={12} /> CHAT WA
-                </a>
-              )}
-            </div>
-          ))
+            return (
+              <div
+                key={warga._id || index}
+                className="px-6 py-4 flex justify-between items-center hover:bg-slate-50 transition border-b last:border-0 border-slate-100"
+              >
+                <div>
+                  <p className="font-bold text-slate-800 text-sm">
+                    {warga.headOfFamily}
+                  </p>
+                  <p className="text-[10px] text-slate-400 uppercase tracking-wider font-bold">
+                    KEPALA KELUARGA
+                  </p>
+                </div>
+
+                {hasValidWA && (
+                  <a
+                    href={`https://wa.me/${cleanNumber.replace(/^0/, "62")}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-1.5 bg-[#7ba85a]/10 hover:bg-[#7ba85a]/20 text-[#7ba85a] px-3 py-1.5 rounded-lg text-[10px] font-bold transition"
+                  >
+                    <MessageCircle size={12} /> CHAT WA
+                  </a>
+                )}
+              </div>
+            );
+          })
         ) : (
           <div className="p-8 text-center text-slate-400 text-sm">
             Data warga belum tersedia.

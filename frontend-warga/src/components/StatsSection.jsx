@@ -1,33 +1,10 @@
 import React from "react";
 
-const StatsSection = ({ summary, wargaSummary, loading, onShowWarga }) => {
-  const formatRp = (angka) => {
-    return new Intl.NumberFormat("id-ID", {
-      style: "currency",
-      currency: "IDR",
-      maximumFractionDigits: 0,
-    }).format(angka || 0);
-  };
-
+const StatsSection = ({ wargaSummary, loading, onShowWarga }) => {
   return (
-    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-      {/* Saldo Kas RT */}
-      <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-blue-500 flex flex-col justify-between">
-        <div>
-          <h2 className="text-gray-500 font-semibold uppercase text-xs mb-1">
-            Saldo Kas RT
-          </h2>
-          <p className="text-3xl font-black text-blue-700">
-            {loading ? "..." : formatRp(summary.saldoAkhir)}
-          </p>
-        </div>
-        <p className="text-xs text-gray-400 mt-4 border-t pt-2">
-          Diperbarui secara real-time
-        </p>
-      </div>
-
+    <div className="w-full">
       {/* Statistik Warga */}
-      <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500 flex flex-col justify-between md:col-span-2">
+      <div className="bg-white p-6 rounded-lg shadow-md border-t-4 border-green-500 flex flex-col justify-between">
         <div className="flex justify-between items-start">
           <div>
             <h2 className="text-gray-500 font-semibold uppercase text-xs mb-2">

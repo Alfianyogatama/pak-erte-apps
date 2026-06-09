@@ -42,7 +42,7 @@ const Home = () => {
         setData({
           inventories: invRes.data,
           summary: sumRes.data,
-          transactions: transRes.data.slice(0, 5),
+          transactions: transRes.data, // Kirim semua data agar bisa difilter per kategori
           wargaSummary: wargaSumRes.data,
           publicFamilies: wargaPubRes.data,
           informations: infoRes.data,
@@ -94,7 +94,10 @@ const Home = () => {
             <h3 className="font-bold text-lg mb-4 text-[#1e4a6e]">
               Aktivitas Kas
             </h3>
-            <CashFlowTable transactions={data.transactions} />
+            <CashFlowTable
+              transactions={data.transactions}
+              summary={data.summary}
+            />
           </div>
           <div className="bg-white p-6 rounded-3xl shadow-sm border border-slate-100">
             <h3 className="font-bold text-lg mb-4 text-[#1e4a6e]">

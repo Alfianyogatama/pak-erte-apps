@@ -7,23 +7,35 @@ export const getTransactionSummary = async (req, res) => {
     const result = await Transaction.aggregate([
       {
         $group: {
-          _id: "$type",
-          totalAmount: { $sum: "$amount" },
+          _id: "$category",
+          balance: {
+            $sum: {
+              $cond: [
+                { $eq: ["$type", "Masuk"] },
+                "$amount",
+                { $multiply: ["$amount", -1] },
+              ],
+            },
+          },
         },
       },
     ]);
 
-    let totalMasuk = 0;
-    let totalKeluar = 0;
+    const summary = {
+      RT: 0,
+      Jimpitan: 0,
+      Inventaris: 0,
+      saldoAkhir: 0,
+    };
 
     result.forEach((item) => {
-      if (item._id === "Masuk") totalMasuk = item.totalAmount;
-      if (item._id === "Keluar") totalKeluar = item.totalAmount;
+      if (summary.hasOwnProperty(item._id)) {
+        summary[item._id] = item.balance;
+        summary.saldoAkhir += item.balance;
+      }
     });
 
-    const saldoAkhir = totalMasuk - totalKeluar;
-
-    res.status(200).json({ totalMasuk, totalKeluar, saldoAkhir });
+    res.status(200).json(summary);
   } catch (error) {
     res
       .status(500)
@@ -41,12 +53,10 @@ export const getTransactions = async (req, res) => {
     });
     res.status(200).json(transactions);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Gagal mengambil data transaksi",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Gagal mengambil data transaksi",
+      error: error.message,
+    });
   }
 };
 

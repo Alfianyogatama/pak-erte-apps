@@ -76,9 +76,9 @@ const Home = () => {
           </div>
         </div>
 
-        <div className="max-w-6xl mx-auto lg:mx-0">
+        {/* <div className="max-w-6xl mx-auto lg:mx-0">
           <PrayerTime />
-        </div>
+        </div> */}
 
         {/* 1. Stats Section (Kas & Warga) */}
         <StatsSection

@@ -91,13 +91,23 @@ const Inventory = () => {
   const handleDelete = async (id) => {
     const result = await Swal.fire({
       title: "Hapus Barang?",
+      text: "Data barang ini akan dihapus secara permanen dari daftar inventaris.",
       icon: "warning",
       showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
       confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
     });
+
     if (result.isConfirmed) {
-      await api.delete(`/inventories/${id}`);
-      fetchInventories();
+      try {
+        await api.delete(`/inventories/${id}`);
+        Swal.fire("Terhapus!", "Barang berhasil dihapus.", "success");
+        fetchInventories();
+      } catch (error) {
+        Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data.", "error");
+      }
     }
   };
 

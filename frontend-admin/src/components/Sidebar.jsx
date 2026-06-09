@@ -63,6 +63,7 @@ const Sidebar = () => {
       <nav className="flex-1 px-4 py-6 space-y-2">
         {menuItems.map((item) => (
           <NavLink
+            key={item.path}
             to={item.path}
             className={(
               { isActive }, // <--- isActive di sini baru valid

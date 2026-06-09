@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
 import api from "../utils/api";
 import MemberForm from "../components/MemberForm";
+import Swal from "sweetalert2";
 
 const FamilyDetail = () => {
   const { familyId } = useParams();
@@ -20,9 +21,25 @@ const FamilyDetail = () => {
   }, [familyId]);
 
   const handleDelete = async (memberId) => {
-    if (window.confirm("Hapus anggota ini?")) {
-      await api.delete(`/members/${memberId}`);
-      fetchMembers();
+    const result = await Swal.fire({
+      title: "Hapus Anggota?",
+      text: "Data anggota keluarga ini akan dihapus secara permanen!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#d33",
+      cancelButtonColor: "#3085d6",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    });
+
+    if (result.isConfirmed) {
+      try {
+        await api.delete(`/members/${memberId}`);
+        Swal.fire("Terhapus!", "Anggota berhasil dihapus.", "success");
+        fetchMembers();
+      } catch (error) {
+        Swal.fire("Gagal!", "Terjadi kesalahan saat menghapus data.", "error");
+      }
     }
   };
 

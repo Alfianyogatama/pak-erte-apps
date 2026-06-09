@@ -36,14 +36,15 @@ export const login = async (req, res) => {
 };
 
 // Middleware autentikasi di Backend
-const verifyToken = (req, res, next) => {
-  const token = req.headers["authorization"];
+export const verifyToken = (req, res, next) => {
+  const authHeader = req.headers["authorization"];
+  // Mengambil token dari string "Bearer <token>"
+  const token = authHeader && authHeader.split(" ")[1];
 
   if (!token) return res.status(401).json({ message: "Token tidak ditemukan" });
 
   jwt.verify(token, process.env.JWT_SECRET, (err, decoded) => {
     if (err) {
-      // Sinyal ini yang akan dibaca oleh Frontend untuk Logout
       return res.status(401).json({ message: "Token kadaluarsa" });
     }
     req.user = decoded;

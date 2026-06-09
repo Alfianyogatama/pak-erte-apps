@@ -6,16 +6,21 @@ import Swal from "sweetalert2"; // 1. Import SweetAlert2
 
 const Kas = () => {
   const [transactions, setTransactions] = useState([]);
+  const [activeTab, setActiveTab] = useState("RT");
+  const [inventories, setInventories] = useState([]);
   const [summary, setSummary] = useState({
-    totalMasuk: 0,
-    totalKeluar: 0,
-    saldoAkhir: 0,
+    RT: 0,
+    Jimpitan: 0,
+    Inventaris: 0,
   });
 
   const [formData, setFormData] = useState({
+    category: "RT",
     type: "Masuk",
     amount: "",
     description: "",
+    contributor: "",
+    itemName: "",
     date: new Date().toISOString().split("T")[0],
   });
 
@@ -32,12 +37,14 @@ const Kas = () => {
 
   const fetchData = async () => {
     try {
-      const [transRes, sumRes] = await Promise.all([
+      const [transRes, sumRes, invRes] = await Promise.all([
         api.get("/transactions"),
         api.get("/transactions/summary"),
+        api.get("/inventories"),
       ]);
       setTransactions(transRes.data);
       setSummary(sumRes.data);
+      setInventories(invRes.data);
     } catch (error) {
       console.error("Gagal mengambil data:", error);
     }
@@ -60,9 +67,12 @@ const Kas = () => {
       }
 
       setFormData({
+        category: "RT",
         type: "Masuk",
         amount: "",
         description: "",
+        contributor: "",
+        itemName: "",
         date: new Date().toISOString().split("T")[0],
       });
       setEditId(null);
@@ -80,9 +90,12 @@ const Kas = () => {
 
   const handleEditClick = (item) => {
     setFormData({
+      category: item.category || "RT",
       type: item.type,
       amount: item.amount,
       description: item.description,
+      contributor: item.contributor || "",
+      itemName: item.itemName || "",
       date: new Date(item.date).toISOString().split("T")[0],
     });
     setEditId(item._id);
@@ -91,9 +104,12 @@ const Kas = () => {
 
   const handleCancelEdit = () => {
     setFormData({
+      category: "RT",
       type: "Masuk",
       amount: "",
       description: "",
+      contributor: "",
+      itemName: "",
       date: new Date().toISOString().split("T")[0],
     });
     setEditId(null);
@@ -127,30 +143,47 @@ const Kas = () => {
     <AdminLayout title="Manajemen Kas RT">
       {/* KARTU RINGKASAN */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-        <div className="bg-white p-6 rounded shadow border-l-4 border-green-500">
-          <h3 className="text-gray-500 text-sm font-semibold uppercase">
-            Total Pemasukan
-          </h3>
-          <p className="text-2xl font-bold text-green-600">
-            {formatRp(summary.totalMasuk)}
-          </p>
-        </div>
-        <div className="bg-white p-6 rounded shadow border-l-4 border-red-500">
-          <h3 className="text-gray-500 text-sm font-semibold uppercase">
-            Total Pengeluaran
-          </h3>
-          <p className="text-2xl font-bold text-red-600">
-            {formatRp(summary.totalKeluar)}
-          </p>
-        </div>
         <div className="bg-white p-6 rounded shadow border-l-4 border-blue-500">
           <h3 className="text-gray-500 text-sm font-semibold uppercase">
-            Saldo Kas Saat Ini
+            Saldo Kas RT
           </h3>
-          <p className="text-3xl font-black text-blue-700">
-            {formatRp(summary.saldoAkhir)}
+          <p className="text-2xl font-bold text-blue-600">
+            {formatRp(summary.RT)}
           </p>
         </div>
+        <div className="bg-white p-6 rounded shadow border-l-4 border-emerald-500">
+          <h3 className="text-gray-500 text-sm font-semibold uppercase">
+            Saldo Kas Jimpitan
+          </h3>
+          <p className="text-2xl font-bold text-emerald-600">
+            {formatRp(summary.Jimpitan)}
+          </p>
+        </div>
+        <div className="bg-white p-6 rounded shadow border-l-4 border-purple-500">
+          <h3 className="text-gray-500 text-sm font-semibold uppercase">
+            Saldo Kas Inventaris
+          </h3>
+          <p className="text-2xl font-bold text-purple-600">
+            {formatRp(summary.Inventaris)}
+          </p>
+        </div>
+      </div>
+
+      {/* TAB NAVIGATION */}
+      <div className="flex border-b mb-6 overflow-x-auto">
+        {["RT", "Jimpitan", "Inventaris"].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setActiveTab(tab)}
+            className={`px-8 py-3 font-bold text-sm transition-all whitespace-nowrap border-b-2 ${
+              activeTab === tab
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-gray-400 hover:text-gray-600"
+            }`}
+          >
+            KAS {tab.toUpperCase()}
+          </button>
+        ))}
       </div>
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
@@ -167,6 +200,64 @@ const Kas = () => {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700">
+                Pilih Modul Kas
+              </label>
+              <select
+                value={formData.category}
+                onChange={(e) =>
+                  setFormData({ ...formData, category: e.target.value })
+                }
+                className="mt-1 w-full p-2 border rounded bg-white font-bold"
+              >
+                <option value="RT">Kas RT (Umum)</option>
+                <option value="Jimpitan">Kas Jimpitan</option>
+                <option value="Inventaris">Kas Inventaris</option>
+              </select>
+            </div>
+
+            {formData.category === "Jimpitan" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Nama Petugas Jimpitan
+                </label>
+                <input
+                  type="text"
+                  value={formData.contributor}
+                  onChange={(e) =>
+                    setFormData({ ...formData, contributor: e.target.value })
+                  }
+                  placeholder="Pak Mardi..."
+                  className="mt-1 w-full p-2 border rounded"
+                  required
+                />
+              </div>
+            )}
+
+            {formData.category === "Inventaris" && (
+              <div>
+                <label className="block text-sm font-medium text-gray-700">
+                  Nama Barang
+                </label>
+                <select
+                  value={formData.itemName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, itemName: e.target.value })
+                  }
+                  className="mt-1 w-full p-2 border rounded bg-white"
+                  required
+                >
+                  <option value="">-- Pilih Barang --</option>
+                  {inventories.map((inv) => (
+                    <option key={inv._id} value={inv.name}>
+                      {inv.name}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+
             <div>
               <label className="block text-sm font-medium text-gray-700">
                 Jenis Transaksi
@@ -221,7 +312,7 @@ const Kas = () => {
                 onChange={(e) =>
                   setFormData({ ...formData, description: e.target.value })
                 }
-                placeholder="Misal: Iuran Warga Blok A..."
+                placeholder="Misal: Bantuan Pemerintah/Operasional..."
                 className="mt-1 w-full p-2 border rounded"
                 required
               ></textarea>
@@ -265,60 +356,73 @@ const Kas = () => {
               </tr>
             </thead>
             <tbody>
-              {transactions.length === 0 ? (
+              {transactions.filter((t) => t.category === activeTab).length ===
+              0 ? (
                 <tr>
                   <td colSpan="4" className="text-center p-4 text-gray-500">
-                    Belum ada riwayat transaksi.
+                    Belum ada riwayat transaksi untuk Kas {activeTab}.
                   </td>
                 </tr>
               ) : (
-                transactions.map((item) => (
-                  <tr
-                    key={item._id}
-                    className={`border-b hover:bg-gray-50 ${editId === item._id ? "bg-blue-50" : ""}`}
-                  >
-                    <td className="p-3 text-sm text-gray-600 whitespace-nowrap">
-                      {new Date(item.date).toLocaleDateString("id-ID", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="p-3">
-                      <p className="font-medium text-gray-800">
-                        {item.description}
-                      </p>
-                      <span
-                        className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${item.type === "Masuk" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
-                      >
-                        {item.type.toUpperCase()}
-                      </span>
-                    </td>
-                    <td
-                      className={`p-3 text-right font-bold ${item.type === "Masuk" ? "text-green-600" : "text-red-600"}`}
+                transactions
+                  .filter((t) => t.category === activeTab)
+                  .map((item) => (
+                    <tr
+                      key={item._id}
+                      className={`border-b hover:bg-gray-50 ${editId === item._id ? "bg-blue-50" : ""}`}
                     >
-                      {item.type === "Masuk" ? "+" : "-"}
-                      {formatRp(item.amount)}
-                    </td>
-                    <td className="p-3 text-center">
-                      <div className="flex justify-center gap-2">
-                        <button
-                          onClick={() => handleEditClick(item)}
-                          className="text-yellow-600 hover:text-yellow-800 font-medium text-sm transition"
+                      <td className="p-3 text-sm text-gray-600 whitespace-nowrap">
+                        {new Date(item.date).toLocaleDateString("id-ID", {
+                          day: "2-digit",
+                          month: "short",
+                          year: "numeric",
+                        })}
+                      </td>
+                      <td className="p-3">
+                        <p className="font-medium text-gray-800">
+                          {item.description}
+                        </p>
+                        {item.contributor && (
+                          <p className="text-[11px] text-blue-600 font-semibold italic">
+                            Penyumbang: {item.contributor}
+                          </p>
+                        )}
+                        {item.itemName && (
+                          <p className="text-[11px] text-purple-600 font-semibold italic">
+                            Barang: {item.itemName}
+                          </p>
+                        )}
+                        <span
+                          className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${item.type === "Masuk" ? "bg-green-100 text-green-700" : "bg-red-100 text-red-700"}`}
                         >
-                          Edit
-                        </button>
-                        <span className="text-gray-300">|</span>
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          className="text-red-600 hover:text-red-800 font-medium text-sm transition"
-                        >
-                          Hapus
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                          {item.type.toUpperCase()}
+                        </span>
+                      </td>
+                      <td
+                        className={`p-3 text-right font-bold ${item.type === "Masuk" ? "text-green-600" : "text-red-600"}`}
+                      >
+                        {item.type === "Masuk" ? "+" : "-"}
+                        {formatRp(item.amount)}
+                      </td>
+                      <td className="p-3 text-center">
+                        <div className="flex justify-center gap-2">
+                          <button
+                            onClick={() => handleEditClick(item)}
+                            className="text-yellow-600 hover:text-yellow-800 font-medium text-sm transition"
+                          >
+                            Edit
+                          </button>
+                          <span className="text-gray-300">|</span>
+                          <button
+                            onClick={() => handleDelete(item._id)}
+                            className="text-red-600 hover:text-red-800 font-medium text-sm transition"
+                          >
+                            Hapus
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
               )}
             </tbody>
           </table>

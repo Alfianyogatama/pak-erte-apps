@@ -32,9 +32,17 @@ const inventorySchema = new mongoose.Schema(
 // 3. Model Kas RT (Transaksi iuran/operasional)
 const transactionSchema = new mongoose.Schema(
   {
+    category: {
+      type: String,
+      enum: ["RT", "Jimpitan", "Inventaris"],
+      required: true,
+      default: "RT",
+    },
     type: { type: String, enum: ["Masuk", "Keluar"], required: true },
     amount: { type: Number, required: true },
     description: { type: String, required: true },
+    contributor: { type: String }, // Nama Petugas Jimpitan (Khusus Jimpitan)
+    itemName: { type: String }, // Nama Barang (Khusus Inventaris)
     date: { type: Date, default: Date.now },
   },
   { timestamps: true },

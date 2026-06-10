@@ -159,20 +159,6 @@ const Dashboard = () => {
             </div>
           </div>
         )}
-
-        {/* Welcome Card - Desain Lebih Modern */}
-        <div className="bg-indigo-600 p-6 rounded-2xl shadow-lg shadow-indigo-200 text-white flex flex-col md:flex-row justify-between items-center gap-4">
-          <div>
-            <h2 className="text-xl font-bold mb-1">Butuh Bantuan?</h2>
-            <p className="text-indigo-100 text-sm">
-              Gunakan menu di samping untuk mengelola data warga, kas, dan
-              inventaris RT 25.
-            </p>
-          </div>
-          <button className="bg-white text-indigo-600 px-5 py-2 rounded-xl font-bold text-sm hover:bg-indigo-50 transition">
-            Lihat Panduan
-          </button>
-        </div>
       </div>
     </AdminLayout>
   );

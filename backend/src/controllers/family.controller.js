@@ -20,11 +20,99 @@ export const getFamilySummary = async (req, res) => {
   }
 };
 
+// 1b. Dapatkan Statistik Berdasarkan Kelompok Usia
+export const getFamilyAgeStats = async (req, res) => {
+  try {
+    const members = await FamilyMember.find({
+      birthDate: { $exists: true, $ne: null },
+    });
+    const now = new Date();
+
+    const stats = {
+      balita: 0, // 0-5 tahun
+      anak: 0, // 5-11 tahun
+      remaja: 0, // 10-18 tahun
+      dewasa: 0, // 18-59 tahun
+      praLansia: 0, // 45-59 tahun
+      lansiaMuda: 0, // 60-69 tahun
+      lansiaLanjut: 0, // 70-79 tahun
+      lansiaAkhir: 0, // >= 80 tahun
+    };
+
+    members.forEach((member) => {
+      const birthDate = new Date(member.birthDate);
+      let ageInMonths =
+        (now.getFullYear() - birthDate.getFullYear()) * 12 +
+        (now.getMonth() - birthDate.getMonth());
+
+      // Penyesuaian jika bulan belum lewat
+      if (now.getDate() < birthDate.getDate()) {
+        ageInMonths--;
+      }
+
+      const ageInYears = ageInMonths / 12;
+
+      // Kategori Bayi dan Balita: 0–5 tahun (0–59 bulan)
+      if (ageInMonths >= 0 && ageInMonths <= 59) stats.balita++;
+
+      // Anak-anak: 5–11 tahun
+      if (ageInYears >= 5 && ageInYears <= 11) stats.anak++;
+
+      // Remaja: 10–18 tahun
+      if (ageInYears >= 10 && ageInYears <= 18) stats.remaja++;
+
+      // Dewasa: 18–59 tahun
+      if (ageInYears >= 18 && ageInYears <= 59) stats.dewasa++;
+
+      // Pengelompokan Lansia & Pra-Lansia
+      // Pra-Lansia: 45–59 tahun
+      if (ageInYears >= 45 && ageInYears <= 59) stats.praLansia++;
+
+      // Lansia Muda: 60–69 tahun
+      if (ageInYears >= 60 && ageInYears <= 69) stats.lansiaMuda++;
+
+      // Lansia Lanjut: 70–79 tahun
+      if (ageInYears >= 70 && ageInYears <= 79) stats.lansiaLanjut++;
+
+      // Lansia Lanjut Usia Akhir: >= 80 tahun
+      if (ageInYears >= 80) stats.lansiaAkhir++;
+    });
+
+    res.status(200).json(stats);
+  } catch (error) {
+    res
+      .status(500)
+      .json({
+        message: "Gagal mengambil statistik usia",
+        error: error.message,
+      });
+  }
+};
+
 // 2. Dapatkan Detail Semua KK (Hanya Ketua RT)
 export const getFamilies = async (req, res) => {
   try {
-    // Mengurutkan data berdasarkan Nama Kepala Keluarga secara alfabetis
-    const families = await Family.find().sort({ headOfFamily: 1 });
+    const { search } = req.query;
+    let query = {};
+
+    if (search) {
+      // Cari anggota keluarga yang namanya cocok dengan kata kunci
+      const matchingMembers = await FamilyMember.find({
+        name: { $regex: search, $options: "i" },
+      }).select("familyId");
+
+      const familyIdsFromMembers = matchingMembers.map((m) => m.familyId);
+
+      // Filter Keluarga berdasarkan Kepala Keluarga ATAU ID yang ditemukan dari pencarian anggota
+      query = {
+        $or: [
+          { headOfFamily: { $regex: search, $options: "i" } },
+          { _id: { $in: familyIdsFromMembers } },
+        ],
+      };
+    }
+
+    const families = await Family.find(query).sort({ headOfFamily: 1 });
     res.status(200).json(families);
   } catch (error) {
     res

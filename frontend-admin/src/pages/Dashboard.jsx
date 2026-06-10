@@ -8,14 +8,16 @@ const Dashboard = () => {
     totalKas: 0,
     totalKK: 0,
   });
+  const [ageStats, setAgeStats] = useState(null);
 
   useEffect(() => {
     const fetchAllStats = async () => {
       try {
-        const [invRes, kasRes, wargaRes] = await Promise.all([
+        const [invRes, kasRes, wargaRes, ageRes] = await Promise.all([
           api.get("/inventories"),
           api.get("/transactions/summary"),
           api.get("/families/summary"),
+          api.get("/families/stats"),
         ]);
 
         setStats({
@@ -23,6 +25,7 @@ const Dashboard = () => {
           totalKas: kasRes.data.saldoAkhir,
           totalKK: wargaRes.data.totalKK,
         });
+        setAgeStats(ageRes.data);
       } catch (error) {
         console.error("Gagal memuat statistik dashboard", error);
       }
@@ -91,6 +94,71 @@ const Dashboard = () => {
             </div>
           ))}
         </div>
+
+        {/* Demografi Usia Section */}
+        {ageStats && (
+          <div className="mb-8">
+            <h2 className="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+              📊 Demografi Usia Warga
+            </h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              {[
+                {
+                  label: "Balita (0-5th)",
+                  val: ageStats.balita,
+                  color: "bg-pink-50 text-pink-700",
+                },
+                {
+                  label: "Anak (5-11th)",
+                  val: ageStats.anak,
+                  color: "bg-orange-50 text-orange-700",
+                },
+                {
+                  label: "Remaja (10-18th)",
+                  val: ageStats.remaja,
+                  color: "bg-blue-50 text-blue-700",
+                },
+                {
+                  label: "Dewasa (18-59th)",
+                  val: ageStats.dewasa,
+                  color: "bg-green-50 text-green-700",
+                },
+                {
+                  label: "Pra-Lansia (45-59th)",
+                  val: ageStats.praLansia,
+                  color: "bg-teal-50 text-teal-700",
+                },
+                {
+                  label: "Lansia Muda (60-69th)",
+                  val: ageStats.lansiaMuda,
+                  color: "bg-purple-50 text-purple-700",
+                },
+                {
+                  label: "Lansia Lanjut (70-79th)",
+                  val: ageStats.lansiaLanjut,
+                  color: "bg-red-50 text-red-700",
+                },
+                {
+                  label: "Lansia Akhir (≥80th)",
+                  val: ageStats.lansiaAkhir,
+                  color: "bg-slate-100 text-slate-700",
+                },
+              ].map((item, idx) => (
+                <div
+                  key={idx}
+                  className={`${item.color} p-4 rounded-2xl border border-white/50 shadow-sm`}
+                >
+                  <p className="text-[10px] font-bold uppercase tracking-wider opacity-70">
+                    {item.label}
+                  </p>
+                  <p className="text-2xl font-black mt-1">
+                    {item.val} <span className="text-xs font-normal">Jiwa</span>
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Welcome Card - Desain Lebih Modern */}
         <div className="bg-indigo-600 p-6 rounded-2xl shadow-lg shadow-indigo-200 text-white flex flex-col md:flex-row justify-between items-center gap-4">

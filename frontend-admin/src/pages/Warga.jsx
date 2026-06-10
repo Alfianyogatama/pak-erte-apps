@@ -5,12 +5,13 @@ import api from "../utils/api";
 import Swal from "sweetalert2"; // Import SweetAlert2
 import MemberForm from "../components/MemberForm"; // Pastikan path ini benar sesuai struktur proyek Anda
 import MemberDetailModal from "../components/MemberDetailModal";
-import { Eye, Plus, UserPlus, Pencil, Trash2 } from "lucide-react"; // Import icon untuk UI lebih bagus
+import { Eye, Plus, UserPlus, Pencil, Trash2, Search } from "lucide-react"; // Import icon untuk UI lebih bagus
 import { NavLink } from "react-router-dom";
 
 const Warga = () => {
   const [families, setFamilies] = useState([]);
   const [summary, setSummary] = useState({ totalKK: 0, totalWarga: 0 });
+  const [searchTerm, setSearchTerm] = useState("");
 
   const initialFormState = {
     headOfFamily: "",
@@ -29,7 +30,7 @@ const Warga = () => {
   const fetchData = async () => {
     try {
       const [listRes, sumRes] = await Promise.all([
-        api.get("/families"),
+        api.get("/families", { params: { search: searchTerm } }),
         api.get("/families/summary"),
       ]);
       setFamilies(listRes.data);
@@ -41,7 +42,7 @@ const Warga = () => {
 
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [searchTerm]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -296,9 +297,22 @@ const Warga = () => {
 
         {/* TABEL DATA WARGA */}
         <div className="xl:col-span-2 bg-white p-6 rounded shadow overflow-x-auto">
-          <h2 className="text-lg font-bold mb-4">
-            Daftar Kepala Keluarga RT 25
-          </h2>
+          <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-4">
+            <h2 className="text-lg font-bold">Daftar Kepala Keluarga RT 25</h2>
+            <div className="relative w-full md:w-64">
+              <input
+                type="text"
+                placeholder="Cari nama warga / KK..."
+                className="w-full pl-3 pr-10 py-2 border rounded-xl text-sm focus:ring-2 focus:ring-blue-500 outline-none transition-all"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+              />
+              <Search
+                className="absolute right-3 top-2.5 text-gray-400"
+                size={16}
+              />
+            </div>
+          </div>
           <table className="w-full text-left border-collapse min-w-[700px]">
             <thead>
               <tr className="bg-gray-100 border-b">

@@ -1,5 +1,6 @@
 // backend/src/controllers/family.controller.js
 import { Family, FamilyMember } from "../models/index.js";
+import redisClient from "../config/redis.js"; // Import Redis client
 
 // 1. Dapatkan Statistik Warga (Bisa diakses publik/Landing Page)
 // backend/src/controllers/family.controller.js -> Cek fungsi nomor 1
@@ -23,6 +24,14 @@ export const getFamilySummary = async (req, res) => {
 // 1b. Dapatkan Statistik Berdasarkan Kelompok Usia
 export const getFamilyAgeStats = async (req, res) => {
   try {
+    const cacheKey = "families:age_stats";
+
+    // Coba ambil dari cache
+    const cachedStats = await redisClient.get(cacheKey);
+    if (cachedStats) {
+      return res.status(200).json(JSON.parse(cachedStats));
+    }
+
     const members = await FamilyMember.find({
       birthDate: { $exists: true, $ne: null },
     });
@@ -78,14 +87,15 @@ export const getFamilyAgeStats = async (req, res) => {
       if (ageInYears >= 80) stats.lansiaAkhir++;
     });
 
+    // Simpan ke cache selama 1 jam (3600 detik)
+    await redisClient.set(cacheKey, JSON.stringify(stats), "EX", 3600);
+
     res.status(200).json(stats);
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Gagal mengambil statistik usia",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Gagal mengambil statistik usia",
+      error: error.message,
+    });
   }
 };
 
@@ -126,6 +136,8 @@ export const createFamily = async (req, res) => {
   try {
     const newFamily = new Family(req.body);
     const savedFamily = await newFamily.save();
+    // Invalidate the general families list cache when a new family is created
+    await redisClient.del(["families:all", "families:age_stats"]);
     res.status(201).json(savedFamily);
   } catch (error) {
     res.status(400).json({ message: "Data tidak valid", error: error.message });
@@ -139,6 +151,12 @@ export const updateFamily = async (req, res) => {
     const updated = await Family.findByIdAndUpdate(id, req.body, { new: true });
     if (!updated)
       return res.status(404).json({ message: "Data warga tidak ditemukan" });
+
+    // Invalidate the general families list cache after a successful update
+    await redisClient.del(["families:all", "families:age_stats"]);
+    // For more robust caching, you might also want to invalidate specific search caches,
+    // but that requires a more complex key management (e.g., using Redisearch or tags).
+    // For simplicity, we only clear the general list for now.
     res.status(200).json(updated);
   } catch (error) {
     res
@@ -154,6 +172,10 @@ export const deleteFamily = async (req, res) => {
     const deleted = await Family.findByIdAndDelete(id);
     if (!deleted)
       return res.status(404).json({ message: "Data warga tidak ditemukan" });
+
+    // Invalidate the general families list cache after a successful deletion
+    await redisClient.del(["families:all", "families:age_stats"]);
+    // Similar to update, more complex invalidation for search caches could be added here.
     res.status(200).json({ message: "Data berhasil dihapus" });
   } catch (error) {
     res

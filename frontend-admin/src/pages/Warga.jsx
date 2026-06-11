@@ -1,5 +1,5 @@
 // frontend-admin/src/pages/Warga.jsx
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "../components/AdminLayout";
 import api from "../utils/api";
 import Swal from "sweetalert2"; // Import SweetAlert2
@@ -12,6 +12,7 @@ const Warga = () => {
   const [families, setFamilies] = useState([]);
   const [summary, setSummary] = useState({ totalKK: 0, totalWarga: 0 });
   const [searchTerm, setSearchTerm] = useState("");
+  const formRef = useRef(null);
 
   const initialFormState = {
     headOfFamily: "",
@@ -77,7 +78,7 @@ const Warga = () => {
       keterangan: item.keterangan || "",
     });
     setEditId(item._id);
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    formRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
   };
 
   const handleCancelEdit = () => {
@@ -150,7 +151,10 @@ const Warga = () => {
 
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
         {/* FORM TAMBAH/EDIT */}
-        <div className="bg-white p-6 rounded shadow h-fit border-t-4 border-blue-500">
+        <div
+          ref={formRef}
+          className="bg-white p-6 rounded shadow h-fit border-t-4 border-blue-500"
+        >
           <h2 className="text-lg font-bold mb-4">
             {editId ? "Edit Data Warga" : "Tambah Kepala Keluarga"}
           </h2>

@@ -5,7 +5,7 @@ export const getInventoryById = async (req, res) => {
     const inventory = await Inventory.findById(req.params.id);
     if (!inventory)
       return res.status(404).json({ message: "Barang tidak ditemukan" });
-    console.log("Data inventaris ditemukan:", inventory);
+
     res.json(inventory);
   } catch (error) {
     res.status(500).json({ message: "Error server" });
@@ -15,7 +15,24 @@ export const getInventoryById = async (req, res) => {
 export const getInventories = async (req, res) => {
   try {
     const inventories = await Inventory.find().sort({ createdAt: -1 });
-    res.status(200).json(inventories);
+    // Tambahkan kalkulasi stok untuk mempermudah frontend (Admin)
+    const data = inventories.map((item) => ({
+      ...item.toObject(),
+      brokenQuantity: item.brokenQuantity || 0,
+      available:
+        (item.totalQuantity || 0) -
+        (item.borrowedQuantity || 0) -
+        (item.brokenQuantity || 0),
+      totalBorrowed: item.borrowedQuantity || 0,
+      // Status dinamis agar UI dot dan teks di admin konsisten
+      conditionStatus:
+        (item.brokenQuantity || 0) === 0
+          ? "Baik"
+          : (item.brokenQuantity || 0) >= (item.totalQuantity || 0)
+            ? "Rusak Total"
+            : "Sebagian Rusak",
+    }));
+    res.status(200).json(data);
   } catch (error) {
     res
       .status(500)
@@ -46,7 +63,6 @@ export const createInventory = async (req, res) => {
       totalQuantity,
       description,
       availabilityStatus: "Tersedia",
-      conditionStatus: "Baik",
     });
 
     const savedInventory = await newInventory.save();
@@ -80,16 +96,56 @@ export const deleteInventory = async (req, res) => {
 export const updateInventory = async (req, res) => {
   try {
     const { id } = req.params;
-    console.log(req.body);
+    const { totalQuantity, brokenQuantity, conditionNote } = req.body;
+
+    const inventory = await Inventory.findById(id);
+    if (!inventory) {
+      return res.status(404).json({ message: "Barang tidak ditemukan" });
+    }
+
+    // 1. Validasi Input: quantity tidak boleh negatif
+    if (totalQuantity !== undefined && Number(totalQuantity) < 0) {
+      return res
+        .status(400)
+        .json({ message: "Jumlah total tidak boleh negatif" });
+    }
+    const newTotal =
+      totalQuantity !== undefined
+        ? Number(totalQuantity)
+        : inventory.totalQuantity;
+    const newBroken =
+      brokenQuantity !== undefined
+        ? Number(brokenQuantity)
+        : inventory.brokenQuantity;
+
+    // 1. Validasi Input: Tidak boleh negatif
+    if (newTotal < 0 || newBroken < 0) {
+      return res.status(400).json({ message: "Jumlah tidak boleh negatif" });
+    }
+
+    // 2. Validasi Kapasitas Stok
+    // Total harus >= (Dipinjam + Rusak)
+    if (newTotal < inventory.borrowedQuantity + newBroken) {
+      return res.status(400).json({
+        message: `Total stok (${newTotal}) tidak cukup untuk menampung barang dipinjam (${inventory.borrowedQuantity}) dan rusak (${newBroken})`,
+      });
+    }
+
+    // 3. Audit Trail: Jika ada penambahan jumlah rusak, wajib isi note
+    if (newBroken > inventory.brokenQuantity) {
+      if (!conditionNote || conditionNote.trim() === "") {
+        return res.status(400).json({
+          message:
+            "Wajib mengisi catatan kerusakan saat menambah jumlah barang rusak",
+        });
+      }
+    }
+
     const updated = await Inventory.findByIdAndUpdate(
       id,
       { $set: req.body },
-      { new: true },
+      { new: true, runValidators: true },
     );
-
-    if (!updated) {
-      return res.status(404).json({ message: "Barang tidak ditemukan" });
-    }
 
     res.status(200).json(updated);
   } catch (error) {
@@ -108,10 +164,11 @@ export const getInventoryForCitizens = async (req, res) => {
     const data = inventories.map((item) => {
       // 1. Hitung total yang sedang dipinjam untuk barang dengan nama yang sama
       const activeLoans = loans.filter((l) => l.itemName === item.name);
-      const totalBorrowed = activeLoans.reduce((sum, l) => sum + l.quantity, 0);
+      const totalBorrowed = item.borrowedQuantity || 0;
+      const broken = item.brokenQuantity || 0;
 
-      // 2. Hitung sisa yang tersedia di gudang
-      const available = item.totalQuantity - totalBorrowed;
+      // 2. Hitung sisa yang tersedia (Total - Dipinjam - Rusak)
+      const available = (item.totalQuantity || 0) - totalBorrowed - broken;
 
       // 3. Ambil tanggal pengembalian terdekat dari barang yang dipinjam
       const nextReturnDate =
@@ -125,10 +182,18 @@ export const getInventoryForCitizens = async (req, res) => {
         _id: item._id,
         name: item.name,
         totalQuantity: item.totalQuantity,
+        brokenQuantity: broken,
         available: available, // Ini angka yang Anda butuhkan
         totalBorrowed: totalBorrowed, // Ini angka yang Anda butuhkan
         nextReturnDate: nextReturnDate, // Ini tanggal untuk dipinjam
-        conditionStatus: item.conditionStatus,
+        // Status dinamis untuk warga
+        conditionStatus:
+          broken === 0
+            ? "Baik"
+            : broken >= item.totalQuantity
+              ? "Rusak Total"
+              : "Sebagian Rusak",
+        description: item.description,
       };
     });
 

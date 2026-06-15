@@ -3,7 +3,6 @@ import React, { useState, useEffect, useRef } from "react";
 import AdminLayout from "../components/AdminLayout";
 import api from "../utils/api";
 import Swal from "sweetalert2";
-import { useReactToPrint } from "react-to-print";
 import {
   Plus,
   Package,
@@ -25,9 +24,10 @@ const Inventory = () => {
     name: "",
     category: "",
     totalQuantity: 1,
+    brokenQuantity: 0,
     availabilityStatus: "Tersedia",
-    conditionStatus: "Baik",
     description: "",
+    conditionNote: "",
   });
 
   const [loanData, setLoanData] = useState({
@@ -137,20 +137,6 @@ const Inventory = () => {
     }
   };
 
-  // Contoh fungsi pembuka modal
-  // const handleOpenModal = (item) => {
-  //   setLoanData({
-  //     itemName: item.name, // Ambil dari properti item yang di-map
-  //     availableStock: item.totalQuantity, // Pastikan namanya sesuai field di DB Anda
-  //     borrowerName: "",
-  //     quantity: 0,
-  //     loanDate: "",
-  //     returnDate: "",
-  //     description: "",
-  //   });
-  //   setShowLoanModal(true);
-  // };
-
   // Ubah fungsi buka modal edit
   const handleOpenEditModal = async (id) => {
     try {
@@ -163,7 +149,9 @@ const Inventory = () => {
         name: response.data.name,
         category: response.data.category,
         totalQuantity: response.data.totalQuantity,
+        brokenQuantity: response.data.brokenQuantity || 0,
         description: response.data.description || "", // Handle jika description kosong
+        conditionNote: response.data.conditionNote || "",
         // Tambahkan field lain jika ada (misal status)
       });
 
@@ -181,7 +169,7 @@ const Inventory = () => {
   const handleOpenModal = (item) => {
     setLoanData({
       itemName: item.name,
-      availableStock: item.totalQuantity,
+      availableStock: item.available,
       borrowerName: "",
       quantity: 0,
       loanDate: new Date().toISOString().split("T")[0],
@@ -242,19 +230,60 @@ const Inventory = () => {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
-                  Jumlah
-                </label>
-                <input
-                  type="number"
-                  className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e4a6e] outline-none transition-all"
-                  value={formData.totalQuantity}
-                  onChange={(e) =>
-                    setFormData({ ...formData, totalQuantity: e.target.value })
-                  }
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
+                    Total Stok
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#1e4a6e] outline-none transition-all"
+                    value={formData.totalQuantity}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        totalQuantity: e.target.value,
+                      })
+                    }
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
+                    Jumlah Rusak
+                  </label>
+                  <input
+                    type="number"
+                    className="w-full p-3 bg-red-50 border border-red-100 text-red-600 rounded-xl focus:ring-2 focus:ring-red-500 outline-none transition-all"
+                    value={formData.brokenQuantity}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        brokenQuantity: e.target.value,
+                      })
+                    }
+                  />
+                </div>
               </div>
+
+              {Number(formData.brokenQuantity) > 0 && (
+                <div>
+                  <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
+                    Catatan Kerusakan <span className="text-red-500">*</span>
+                  </label>
+                  <textarea
+                    className="w-full p-3 bg-slate-50 border border-slate-200 rounded-xl h-20 resize-none focus:ring-2 focus:ring-[#1e4a6e] outline-none"
+                    placeholder="Alasan mengapa barang rusak..."
+                    value={formData.conditionNote}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        conditionNote: e.target.value,
+                      })
+                    }
+                    required={Number(formData.brokenQuantity) > 0}
+                  />
+                </div>
+              )}
 
               <div>
                 <label className="block text-xs font-bold text-slate-400 uppercase mb-1">
@@ -402,156 +431,155 @@ const Inventory = () => {
         </div>
       )}
 
-      {/* TABEL */}
-      <div className="bg-white rounded-3xl shadow-sm border border-slate-100 overflow-x-auto">
-        <table className="w-full text-left table-fixed min-w-[600px]">
-          <thead>
-            <tr>
-              {/* Berikan lebar spesifik agar kolom tidak berebut ruang */}
-              <th className="p-4 w-1/2">Barang</th>
-              <th className="p-4 w-1/4 text-right">Stok</th>
-              <th className="p-4 w-[120px] text-center">Aksi</th>{" "}
-              {/* Kasih lebar tetap */}
-            </tr>
-          </thead>
-          <tbody>
-            {inventories.length === 0 ? (
-              <tr>
-                <td colSpan="4" className="text-center p-4 text-gray-500">
-                  Belum ada data.
-                </td>
-              </tr>
-            ) : (
-              inventories.map((item) => (
-                <React.Fragment key={item._id}>
-                  {/* BARIS UTAMA */}
-                  <tr
-                    className={`border-b border-slate-50 hover:bg-slate-50 transition-colors ${expandedId === item._id ? "bg-blue-50/50" : ""}`}
-                  >
-                    {/* 1. Kolom Nama & Status Barang */}
-                    <td
-                      className="p-4 cursor-pointer"
-                      onClick={() => toggleExpand(item)}
+      {/* TABEL RESPONSIVE */}
+      <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        {/* Header Tabel Desktop */}
+        <div className="hidden md:grid grid-cols-6 gap-4 p-4 bg-gray-50 border-b font-semibold text-sm text-gray-600">
+          <div className="col-span-2">Barang</div>
+          <div className="text-center">Kondisi</div>
+          <div className="text-center">Stok (Tersedia)</div>
+          <div className="text-center">Status</div>
+          <div className="text-right pr-4">Aksi</div>
+        </div>
+
+        {/* List Data */}
+        <div className="divide-y">
+          {inventories.length === 0 ? (
+            <div className="p-8 text-center text-gray-500 italic">
+              Belum ada data barang.
+            </div>
+          ) : (
+            inventories.map((item) => (
+              <React.Fragment key={item._id}>
+                {/* Mobile View: Card, Desktop View: Grid Row */}
+                <div className="grid grid-cols-1 md:grid-cols-6 gap-4 p-4 items-center hover:bg-gray-50 transition">
+                  {/* Info Barang */}
+                  <div className="col-span-2">
+                    <h3 className="font-bold text-gray-800">{item.name}</h3>
+                    <p className="text-xs text-gray-500">{item.category}</p>
+                  </div>
+
+                  {/* Kondisi */}
+                  <div className="flex md:justify-center items-center gap-2">
+                    <span className="md:hidden text-xs text-gray-500">
+                      Kondisi:
+                    </span>
+                    <span
+                      className={`px-2 py-1 rounded-full text-[10px] font-bold ${
+                        item.conditionStatus === "Baik"
+                          ? "bg-green-100 text-green-700"
+                          : item.conditionStatus === "Rusak Total"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-orange-100 text-orange-700"
+                      }`}
                     >
-                      <div className="flex items-center gap-3">
-                        <div
-                          className={`w-2 h-2 rounded-full ${item.conditionStatus === "Baik" ? "bg-green-500" : "bg-red-500"}`}
-                        ></div>
-                        <div>
-                          <p className="font-bold text-slate-800">
-                            {item.name}
-                          </p>
-                          <p className="text-[10px] text-slate-400 uppercase tracking-widest font-bold">
-                            {item.conditionStatus}
-                          </p>
-                        </div>
-                      </div>
-                    </td>
+                      {item.conditionStatus}
+                    </span>
+                  </div>
 
-                    {/* 2. Kolom Stok Visual */}
-                    <td className="p-4">
-                      <div className="flex flex-col items-end">
-                        <div className="flex gap-2 text-xs mb-1">
-                          <span className="text-slate-400">
-                            Tersedia:{" "}
-                            <b className="text-slate-800">{item.available}</b>
-                          </span>
-                          <span className="text-slate-400">|</span>
-                          <span className="text-orange-500 font-bold">
-                            Dipinjam: {item.totalBorrowed}
-                          </span>
-                        </div>
-                        {/* Progress Bar Stok */}
-                        <div className="w-32 h-2 bg-slate-100 rounded-full overflow-hidden flex">
+                  {/* Stok */}
+                  <div className="flex md:justify-center items-center gap-2">
+                    <span className="md:hidden text-xs text-gray-500">
+                      Stok:
+                    </span>
+                    <span className="font-mono font-bold text-gray-700">
+                      {item.available}{" "}
+                      <span className="text-gray-400 font-normal">
+                        / {item.totalQuantity}
+                      </span>
+                    </span>
+                  </div>
+
+                  {/* Status */}
+                  <div className="flex md:justify-center items-center gap-2">
+                    <span className="md:hidden text-xs text-gray-500">
+                      Status:
+                    </span>
+                    <span
+                      className={`text-[10px] font-bold ${item.available > 0 ? "text-green-600" : "text-orange-600"}`}
+                    >
+                      ● {item.available > 0 ? "Tersedia" : "Dipinjam"}
+                    </span>
+                  </div>
+
+                  {/* Aksi */}
+                  <div className="flex justify-end gap-2">
+                    <button
+                      onClick={() => handleOpenModal(item)}
+                      disabled={item.available <= 0}
+                      title="Pinjam Barang"
+                      className="p-2 text-[#1e4a6e] hover:bg-blue-50 rounded-lg disabled:opacity-30"
+                    >
+                      <Package size={18} />
+                    </button>
+                    <button
+                      onClick={() => handleOpenEditModal(item._id)}
+                      title="Edit Barang"
+                      className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg"
+                    >
+                      <Edit2 size={16} />
+                    </button>
+                    <button
+                      onClick={() => toggleExpand(item)}
+                      title="Detail Pinjaman"
+                      className={`p-2 rounded-lg transition ${expandedId === item._id ? "bg-blue-100 text-blue-600" : "text-gray-400 hover:bg-gray-100"}`}
+                    >
+                      <CornerDownRight size={16} />
+                    </button>
+                    <button
+                      onClick={() => handleDelete(item._id)}
+                      title="Hapus Barang"
+                      className="p-2 text-red-500 hover:bg-red-50 rounded-lg"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Detail Pinjaman (Expanded) */}
+                {expandedId === item._id && (
+                  <div className="bg-blue-50/50 p-4 border-t animate-in slide-in-from-top-2 duration-200">
+                    <h4 className="text-[10px] font-black uppercase text-blue-400 mb-3 tracking-widest">
+                      Daftar Peminjaman Aktif
+                    </h4>
+                    {loanDetails.length === 0 ? (
+                      <p className="text-xs italic text-gray-400">
+                        Tidak ada peminjaman saat ini.
+                      </p>
+                    ) : (
+                      <div className="grid grid-cols-1 gap-2">
+                        {loanDetails.map((loan) => (
                           <div
-                            className="bg-green-500 h-full"
-                            style={{
-                              width: `${(item.available / item.totalQuantity) * 100}%`,
-                            }}
-                          ></div>
-                          <div
-                            className="bg-orange-400 h-full"
-                            style={{
-                              width: `${(item.totalBorrowed / item.totalQuantity) * 100}%`,
-                            }}
-                          ></div>
-                        </div>
+                            key={loan._id}
+                            className="flex justify-between items-center bg-white p-3 rounded-xl border border-blue-100 shadow-sm"
+                          >
+                            <div>
+                              <p className="text-sm font-bold text-gray-800">
+                                {loan.borrowerName}
+                              </p>
+                              <p className="text-[10px] text-gray-500">
+                                {loan.quantity} unit • Pinjam:{" "}
+                                {new Date(loan.loanDate).toLocaleDateString(
+                                  "id-ID",
+                                )}
+                              </p>
+                            </div>
+                            <button
+                              onClick={() => handleReturn(loan._id)}
+                              className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg text-[10px] font-bold transition-all active:scale-95"
+                            >
+                              KEMBALIKAN
+                            </button>
+                          </div>
+                        ))}
                       </div>
-                    </td>
-
-                    {/* 3. Kolom Aksi */}
-                    <td className="p-4 whitespace-nowrap">
-                      <div className="flex justify-end gap-1">
-                        <button
-                          onClick={() => handleOpenEditModal(item._id)}
-                          className="p-2 text-slate-400 hover:text-amber-500 transition shrink-0"
-                        >
-                          <Edit2 size={16} />
-                        </button>
-                        <button
-                          onClick={() => handleOpenModal(item)}
-                          disabled={item.available <= 0}
-                          className="px-3 py-1.5 bg-[#1e4a6e] text-white rounded-lg text-[10px] font-bold hover:bg-[#163853] transition disabled:opacity-50 shrink-0"
-                        >
-                          PINJAM
-                        </button>
-                        <button
-                          onClick={() => handleDelete(item._id)}
-                          className="p-2 text-slate-400 hover:text-red-500 transition shrink-0"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-
-                  {/* BARIS DETAIL EXPAND (Jika diklik) */}
-                  {expandedId === item._id && (
-                    <tr>
-                      <td colSpan="3" className="bg-blue-50 p-4 border-b">
-                        <h4 className="font-bold text-sm mb-2 text-blue-800">
-                          Daftar Peminjaman Aktif:
-                        </h4>
-                        {loanDetails.length === 0 ? (
-                          <p className="text-xs italic text-gray-500">
-                            Tidak ada pinjaman aktif untuk barang ini.
-                          </p>
-                        ) : (
-                          <ul className="text-sm space-y-2">
-                            {loanDetails.map((loan) => (
-                              <li
-                                key={loan._id}
-                                className="flex justify-between items-center bg-white p-2 rounded border border-blue-100"
-                              >
-                                <span>
-                                  <strong>{loan.borrowerName}</strong> -{" "}
-                                  {loan.quantity} unit
-                                  <span className="text-[10px] text-gray-400 ml-2">
-                                    (
-                                    {new Date(
-                                      loan.loanDate,
-                                    ).toLocaleDateString()}
-                                    )
-                                  </span>
-                                </span>
-                                <button
-                                  onClick={() => handleReturn(loan._id)}
-                                  className="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1 rounded text-[10px] uppercase font-bold"
-                                >
-                                  Kembalikan
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
-                      </td>
-                    </tr>
-                  )}
-                </React.Fragment>
-              ))
-            )}
-          </tbody>
-        </table>
+                    )}
+                  </div>
+                )}
+              </React.Fragment>
+            ))
+          )}
+        </div>
       </div>
     </AdminLayout>
   );

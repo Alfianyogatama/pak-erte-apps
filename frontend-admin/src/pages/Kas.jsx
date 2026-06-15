@@ -7,7 +7,6 @@ import Swal from "sweetalert2"; // 1. Import SweetAlert2
 const Kas = () => {
   const [transactions, setTransactions] = useState([]);
   const [activeTab, setActiveTab] = useState("RT");
-  const [inventories, setInventories] = useState([]);
   const [summary, setSummary] = useState({
     RT: 0,
     Jimpitan: 0,
@@ -44,14 +43,12 @@ const Kas = () => {
 
   const fetchData = async () => {
     try {
-      const [transRes, sumRes, invRes] = await Promise.all([
+      const [transRes, sumRes] = await Promise.all([
         api.get("/transactions"),
         api.get("/transactions/summary"),
-        api.get("/inventories"),
       ]);
       setTransactions(transRes.data);
       setSummary(sumRes.data);
-      setInventories(invRes.data);
     } catch (error) {
       console.error("Gagal mengambil data:", error);
     }
@@ -240,29 +237,6 @@ const Kas = () => {
                     className="mt-1 w-full p-2 border rounded"
                     required
                   />
-                </div>
-              )}
-
-              {formData.category === "Inventaris" && (
-                <div>
-                  <label className="block text-sm font-medium text-gray-700">
-                    Nama Barang
-                  </label>
-                  <select
-                    value={formData.itemName}
-                    onChange={(e) =>
-                      setFormData({ ...formData, itemName: e.target.value })
-                    }
-                    className="mt-1 w-full p-2 border rounded bg-white"
-                    required
-                  >
-                    <option value="">-- Pilih Barang --</option>
-                    {inventories.map((inv) => (
-                      <option key={inv._id} value={inv.name}>
-                        {inv.name}
-                      </option>
-                    ))}
-                  </select>
                 </div>
               )}
 

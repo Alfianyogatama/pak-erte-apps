@@ -164,11 +164,12 @@ export const getInventoryForCitizens = async (req, res) => {
     const data = inventories.map((item) => {
       // 1. Hitung total yang sedang dipinjam untuk barang dengan nama yang sama
       const activeLoans = loans.filter((l) => l.itemName === item.name);
-      const totalBorrowed = item.borrowedQuantity || 0;
-      const broken = item.brokenQuantity || 0;
+      const totalBorrowed = Number(item.borrowedQuantity || 0);
+      const broken = Number(item.brokenQuantity || 0);
+      const total = Number(item.totalQuantity || 0);
 
       // 2. Hitung sisa yang tersedia (Total - Dipinjam - Rusak)
-      const available = (item.totalQuantity || 0) - totalBorrowed - broken;
+      const available = total - totalBorrowed - broken;
 
       // 3. Ambil tanggal pengembalian terdekat dari barang yang dipinjam
       const nextReturnDate =
@@ -184,13 +185,13 @@ export const getInventoryForCitizens = async (req, res) => {
         totalQuantity: item.totalQuantity,
         brokenQuantity: broken,
         available: available, // Ini angka yang Anda butuhkan
-        totalBorrowed: totalBorrowed, // Ini angka yang Anda butuhkan
+        totalBorrowed: totalBorrowed,
         nextReturnDate: nextReturnDate, // Ini tanggal untuk dipinjam
         // Status dinamis untuk warga
         conditionStatus:
           broken === 0
             ? "Baik"
-            : broken >= item.totalQuantity
+            : broken >= total
               ? "Rusak Total"
               : "Sebagian Rusak",
         description: item.description,

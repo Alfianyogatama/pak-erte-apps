@@ -13,48 +13,67 @@ const InventoryList = ({ inventories, loading }) => {
         </span>
       </div>
 
-      <div className="grid grid-cols-1 ld:grid-cols-2 gap-4 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
-        {inventories.map((item) => (
-          <div
-            key={item._id}
-            className="group p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-[#1e4a6e]/20 transition-all flex flex-col gap-3"
-          >
-            <p className="font-bold text-slate-800 text-sm truncate group-hover:text-[#1e4a6e] transition">
-              {item.name}
-            </p>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 overflow-y-auto max-h-[500px] pr-2 custom-scrollbar">
+        {inventories.map((item) => {
+          const broken = Number(item.brokenQuantity || 0);
+          const total = Number(item.totalQuantity || 0);
 
-            {/* Bagian Informasi Stok */}
-            <div className="flex gap-2">
-              {/* Tersedia */}
-              <div className="flex-1 bg-white p-2 rounded-xl border border-slate-100 text-center">
-                <p className="text-[9px] text-slate-400 font-bold uppercase">
-                  Tersedia
+          return (
+            <div
+              key={item._id}
+              className="group p-4 bg-slate-50 rounded-2xl border border-slate-100 hover:border-[#1e4a6e]/20 transition-all flex flex-col gap-3"
+            >
+              <div className="flex justify-between items-start">
+                <p className="font-bold text-slate-800 text-sm truncate group-hover:text-[#1e4a6e] transition">
+                  {item.name}
                 </p>
-                <p className="font-bold text-[#7ba85a] text-sm">
-                  {item.available || 0}
-                </p>
+                <span
+                  className={`text-[9px] font-bold uppercase px-2 py-1 rounded-full ${
+                    broken === 0
+                      ? "bg-green-100 text-green-700"
+                      : broken >= total
+                        ? "bg-red-100 text-red-700"
+                        : "bg-orange-100 text-orange-700"
+                  }`}
+                >
+                  {broken === 0
+                    ? "Baik"
+                    : broken >= total
+                      ? "Rusak Total"
+                      : `Rusak: ${broken}`}
+                </span>
               </div>
 
-              {/* Dipinjam */}
-              <div className="flex-1 bg-white p-2 rounded-xl border border-slate-100 text-center">
-                <p className="text-[9px] text-slate-400 font-bold uppercase">
-                  Dipinjam
-                </p>
-                <p className="font-bold text-orange-500 text-sm">
-                  {item.totalBorrowed || 0}
-                </p>
+              {/* Bagian Informasi Stok */}
+              <div className="flex gap-2">
+                <div className="flex-1 bg-white p-2 rounded-xl border border-slate-100 text-center">
+                  <p className="text-[9px] text-slate-400 font-bold uppercase">
+                    Tersedia
+                  </p>
+                  <p className="font-bold text-[#7ba85a] text-sm">
+                    {item.available || 0}
+                  </p>
+                </div>
+                <div className="flex-1 bg-white p-2 rounded-xl border border-slate-100 text-center">
+                  <p className="text-[9px] text-slate-400 font-bold uppercase">
+                    Dipinjam
+                  </p>
+                  <p className="font-bold text-orange-500 text-sm">
+                    {item.totalBorrowed || 0}
+                  </p>
+                </div>
               </div>
+
+              {/* Info Tambahan */}
+              {item.totalBorrowed > 0 && item.nextReturnDate && (
+                <div className="text-[10px] text-slate-400 border-t border-slate-200 pt-2 mt-1">
+                  Pengembalian tercepat:{" "}
+                  {new Date(item.nextReturnDate).toLocaleDateString("id-ID")}
+                </div>
+              )}
             </div>
-
-            {/* Informasi Tambahan (Jika ada barang dipinjam) */}
-            {item.totalBorrowed > 0 && item.nextReturnDate && (
-              <div className="text-[10px] text-slate-400 border-t border-slate-200 pt-2 mt-1">
-                Pengembalian tercepat:{" "}
-                {new Date(item.nextReturnDate).toLocaleDateString("id-ID")}
-              </div>
-            )}
-          </div>
-        ))}
+          );
+        })}
       </div>
     </div>
   );
